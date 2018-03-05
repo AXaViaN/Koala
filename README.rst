@@ -10,4 +10,4 @@ Koala is a visual programming language which helps junior students and hobbyists
 API Documentation
 -----------------
 
-Koala API documentation is located under the "/Doc" folder in reStructuredText format. You can compile it with Sphinx using the Makefile provided in the same folder.
+Koala API documentation is located under the */Doc* folder in reStructuredText format. You can compile it with Sphinx using the Makefile provided in the same folder.

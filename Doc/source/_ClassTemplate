@@ -1,0 +1,24 @@
+ClassName
+=========
+
+.. function:: class Namespace::ClassName;
+
+Class description.
+
+Public Methods
+--------------
+
+.. csv-table::
+	
+	":doc:`(constructor) <_Impl/ClassName_Ctor>`", "Constructors"
+
+.. csv-table::
+	
+	":doc:`Func <_Impl/ClassName_Func>`", "Short Func description"
+
+Private Members
+---------------
+
+.. csv-table::
+	
+	"m_Var", "m_Var description"

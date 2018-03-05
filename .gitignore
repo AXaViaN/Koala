@@ -1,1 +1,5 @@
-﻿/Doc/build
+﻿/.vs
+/Bin
+/Doc/build
+
+!*.lib

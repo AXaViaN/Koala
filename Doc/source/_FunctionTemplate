@@ -1,0 +1,49 @@
+:orphan:
+
+Namespace::ClassName::Func
+==========================
+
+.. csv-table::
+	
+	"**void Func(); const**", "*(1) Default*"
+	"**void Func(size_t size);**", "*(2) Sized*"
+
+*(1) Default*
+	Description.
+
+*(2) Sized*
+	Description.
+
+----
+
+General description.
+
+Parameters
+----------
+
+- **size**
+	Description
+
+Return Value
+------------
+
+Description.
+
+Example
+-------
+
+	.. code-block:: c++
+		
+		// Example code
+
+**Output:**
+	::
+	
+		Example out
+
+See also
+--------
+
+- :doc:`../ClassName`
+
+- :doc:`ClassName::RelatedFunc <ClassName_RelatedFunc>`

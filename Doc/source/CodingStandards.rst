@@ -1,6 +1,8 @@
 Coding Standards
 ================
 
+.. contents:: :local:
+
 Following same rules everywhere in the project makes the code easy to read and easy to maintain. This section describes the coding conventions being followed in the project as well as some of the best coding practices. All of the contributors to the project are expected to follow these rules.
 
 Naming Conventions
@@ -88,32 +90,32 @@ Classes
 	.. code-block:: c++
 		
 		/* 
-		 * Koala/VM/Interpreter.h
+		 * Koala/Editor/CodeBoard.h
 		 */
 		
-		#ifndef KOALA__VM__INTERPRETER
-		#define KOALA__VM__INTERPRETER
+		#ifndef KOALA__EDITOR__CODE_BOARD
+		#define KOALA__EDITOR__CODE_BOARD
 		
 		// ...
 		
-		#endif // KOALA__VM__INTERPRETER
+		#endif // KOALA__EDITOR__CODE_BOARD
 		
 		/* 
-		 * Koala/VM/Private/Interpreter.h
+		 * Koala/Editor/Private/CodeBoard.h
 		 */
 		
-		#ifndef PRIVATE__KOALA__VM__INTERPRETER
-		#define PRIVATE__KOALA__VM__INTERPRETER
+		#ifndef PRIVATE__KOALA__EDITOR__CODE_BOARD
+		#define PRIVATE__KOALA__EDITOR__CODE_BOARD
 		
 		// ...
 		
-		#endif // PRIVATE__KOALA__VM__INTERPRETER
+		#endif // PRIVATE__KOALA__EDITOR__CODE_BOARD
 
 - Some modules have Private source directories. Any definitions that are needed by other modules must be in headers in the module directory, but everything else should be in the Private directory.
 
 - Prefer composition over inheritance. Inheritance is necessary in some cases, but using them too much starts to cause problems. If inheritance is needed, never use multiple inheritance and do not make inheritance tree deeper than 1 (never inherit a child class).
 
-- If you are using any of the custom destructors, copy/move constructors or copy/move assignment, apply rule of five.
+- If you are using any of the custom destructors, copy/move constructors or copy/move assignment, apply rule of five. You can use a separate public field to clear API from cluttering.
 
 General Rules
 -------------
@@ -374,6 +376,8 @@ Includes
 ********
 
 Never do includes relative to the current source file. That makes it harder to move headers around. Instead, set the Source folder as include directory and use :code:`#include <Koala/File.h>` syntax. Since we are using the project name as base folder, we don't need :code:`#include "Koala/File.h"` syntax to make a distinguishment.
+
+Sort included files for easy readability. First, include the own header of the source, then include project headers, then external libraries.
 
 General Style Issues
 ********************

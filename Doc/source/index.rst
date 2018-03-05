@@ -53,10 +53,12 @@ Everything needed to compile the project under Windows is provided in the projec
 	*
 	:hidden:
 	:glob:
+	:titlesonly:
 	:caption: General
 
 .. toctree::
 	*[!Utility]/index
 	Utility/index
 	:glob:
+	:titlesonly:
 	:caption: API Documentation

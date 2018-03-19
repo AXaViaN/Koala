@@ -50,6 +50,36 @@ void Main::Run()
 		Gfx::Renderer::ClearViewport(Gfx::Color(0.2f, 0.4f, 0.8f));
 		m_MainWindow.Update();
 	}
+
+	SendMessage(Service::MessageType::ProgramExit, nullptr);
+}
+
+void Main::OnMessage(Service::MessageType type, void* data)
+{
+
+}
+void Main::OnInput(Service::InputMessageType type, const Service::InputMessageData& data)
+{
+	if(data.Window != m_MainWindow)
+	{
+		return;
+	}
+
+	switch(type)
+	{
+		case Koala::Editor::Service::InputMessageType::KeyPress:
+		{
+			if(data.Key == Tool::KeyType::Space)
+			{
+				m_TestWindow.Destroy();
+			}
+			else if(data.Key == Tool::KeyType::Escape)
+			{
+				m_MainWindow.Destroy();
+			}
+			break;
+		}
+	}
 }
 
 Main::~Main() noexcept

@@ -30,10 +30,23 @@ public:
 
 	size_t GetWidth() const;
 	size_t GetHeight() const;
+	const std::string& GetTitle() const
+	{
+		return m_Title;
+	}
 
 	bool IsValid() const
 	{
 		return (m_Handle != nullptr);
+	}
+
+	bool operator==(const Window& other) const
+	{
+		return (m_Handle == other.m_Handle);
+	}
+	bool operator!=(const Window& other) const
+	{
+		return (m_Handle != other.m_Handle);
 	}
 
 public: // Rule of five
@@ -45,6 +58,7 @@ public: // Rule of five
 
 private:
 	void* m_Handle = nullptr;
+	std::string m_Title;
 
 };
 

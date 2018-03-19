@@ -36,6 +36,15 @@
     <ClCompile Include="Source\Koala\Editor\Gfx\Color.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Koala\Editor\Service\MessageMember.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Koala\Editor\Service\Private\MessageManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Koala\Editor\Tool\Private\Console.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Koala\Editor\Tool\Window.h">
@@ -54,6 +63,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Koala\Editor\Gfx\Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Koala\Editor\Service\MessageMember.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Koala\Editor\Service\Private\MessageManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Koala\Editor\Service\MessageTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Koala\Editor\Tool\Private\Console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

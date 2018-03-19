@@ -1,16 +1,20 @@
 #ifndef KOALA__EDITOR__MAIN
 #define KOALA__EDITOR__MAIN
 
+#include <Koala/Editor/Service/MessageMember.h>
 #include <Koala/Editor/Tool/Window.h>
 
 namespace Koala::Editor {
 
-class Main final
+class Main final : private Service::MessageMember
 {
 public:
 	Main();
 
 	void Run();
+
+	virtual void OnMessage(Service::MessageType type, void* data) override;
+	virtual void OnInput(Service::InputMessageType type, const Service::InputMessageData& data) override;
 
 public: // Rule of five
 	~Main() noexcept;

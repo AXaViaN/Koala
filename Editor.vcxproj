@@ -158,16 +158,23 @@
     <ClCompile Include="Source\Koala\Editor\Gfx\Color.cpp" />
     <ClCompile Include="Source\Koala\Editor\Gfx\Renderer.cpp" />
     <ClCompile Include="Source\Koala\Editor\Main.cpp" />
+    <ClCompile Include="Source\Koala\Editor\Service\MessageMember.cpp" />
+    <ClCompile Include="Source\Koala\Editor\Service\Private\MessageManager.cpp" />
     <ClCompile Include="Source\Koala\Editor\Tool\Input.cpp" />
     <ClCompile Include="Source\Koala\Editor\Tool\PlatformManager.cpp" />
+    <ClCompile Include="Source\Koala\Editor\Tool\Private\Console.cpp" />
     <ClCompile Include="Source\Koala\Editor\Tool\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Koala\Editor\Gfx\Color.h" />
     <ClInclude Include="Source\Koala\Editor\Gfx\Renderer.h" />
     <ClInclude Include="Source\Koala\Editor\Main.h" />
+    <ClInclude Include="Source\Koala\Editor\Service\MessageMember.h" />
+    <ClInclude Include="Source\Koala\Editor\Service\Private\MessageManager.h" />
+    <ClInclude Include="Source\Koala\Editor\Service\MessageTypes.h" />
     <ClInclude Include="Source\Koala\Editor\Tool\Input.h" />
     <ClInclude Include="Source\Koala\Editor\Tool\PlatformManager.h" />
+    <ClInclude Include="Source\Koala\Editor\Tool\Private\Console.h" />
     <ClInclude Include="Source\Koala\Editor\Tool\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,7 +1,7 @@
-Tool
-====
+Service
+=======
 
-Miscellaneous functionality for the editor.
+Service module has message related classes.
 
 .. toctree::
 	*

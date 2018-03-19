@@ -5,7 +5,7 @@ Namespace::ClassName::Func
 
 .. csv-table::
 	
-	"**void Func(); const**", "*(1) Default*"
+	"**void Func() const;**", "*(1) Default*"
 	"**void Func(size_t size);**", "*(2) Sized*"
 
 *(1) Default*

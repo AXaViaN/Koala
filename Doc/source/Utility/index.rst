@@ -1,4 +1,9 @@
 Utility
 =======
 
-Reserved for utility documentation.
+This is a library that implements common functionality for other modules.
+
+.. toctree::
+	*
+	:glob:
+	:titlesonly:

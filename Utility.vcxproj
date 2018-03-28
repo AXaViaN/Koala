@@ -19,11 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Koala\Utility\Clock.h" />
+    <ClInclude Include="Source\Koala\Utility\Date.h" />
     <ClInclude Include="Source\Koala\Utility\File.h" />
+    <ClInclude Include="Source\Koala\Utility\Logger.h" />
+    <ClInclude Include="Source\Koala\Utility\Macro.h" />
     <ClInclude Include="Source\Koala\Utility\Platform.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Koala\Utility\Clock.cpp" />
+    <ClCompile Include="Source\Koala\Utility\Date.cpp" />
     <ClCompile Include="Source\Koala\Utility\File.cpp" />
+    <ClCompile Include="Source\Koala\Utility\Logger.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -77,6 +77,21 @@ void Main::OnInput(Service::InputMessageType type, const Service::InputMessageDa
 			{
 				m_MainWindow.Destroy();
 			}
+			else if(data.Key == Tool::KeyType::S)
+			{
+				auto data = GenerateLogMessageData();
+				data.Message = "Test";
+
+				SendMessage(Service::MessageType::LogInfo, &data);
+			}
+			else if(data.Key == Tool::KeyType::D)
+			{
+				auto data = GenerateLogMessageData();
+				data.Message = "Test2";
+
+				SendMessage(Service::MessageType::LogError, &data);
+			}
+
 			break;
 		}
 	}

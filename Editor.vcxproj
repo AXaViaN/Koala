@@ -163,6 +163,7 @@
     <ClCompile Include="Source\Koala\Editor\Tool\Input.cpp" />
     <ClCompile Include="Source\Koala\Editor\Tool\PlatformManager.cpp" />
     <ClCompile Include="Source\Koala\Editor\Tool\Private\Console.cpp" />
+    <ClCompile Include="Source\Koala\Editor\Tool\Private\LogManager.cpp" />
     <ClCompile Include="Source\Koala\Editor\Tool\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -175,6 +176,7 @@
     <ClInclude Include="Source\Koala\Editor\Tool\Input.h" />
     <ClInclude Include="Source\Koala\Editor\Tool\PlatformManager.h" />
     <ClInclude Include="Source\Koala\Editor\Tool\Private\Console.h" />
+    <ClInclude Include="Source\Koala\Editor\Tool\Private\LogManager.h" />
     <ClInclude Include="Source\Koala\Editor\Tool\Window.h" />
   </ItemGroup>
   <ItemGroup>

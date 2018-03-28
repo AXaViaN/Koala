@@ -3,6 +3,10 @@ ClassName
 
 .. function:: class Namespace::ClassName;
 
+This header also has an enumeration: :doc:`EnumType <_Impl/ClassName_EnumType>`.
+
+----
+
 Class description.
 
 Public Methods

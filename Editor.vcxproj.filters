@@ -45,6 +45,9 @@
     <ClCompile Include="Source\Koala\Editor\Tool\Private\Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Koala\Editor\Tool\Private\LogManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Koala\Editor\Tool\Window.h">
@@ -75,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Koala\Editor\Tool\Private\Console.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Koala\Editor\Tool\Private\LogManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

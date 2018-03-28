@@ -7,6 +7,8 @@ KeyType
 
 Enumeration for keys. These key codes are inherited from the `GLFW: Keyboard keys <http://www.glfw.org/docs/latest/group__keys.html>`_.
 
+This enum is created with macros that provides string versions of the values.
+
 .. csv-table::
 	
 	"Unknown = -1"
@@ -138,6 +140,16 @@ Enumeration for keys. These key codes are inherited from the `GLFW: Keyboard key
 	"RightAlt"
 	"RightSuper"
 	"Menu"
+
+Example
+-------
+
+	.. code-block:: c++
+		
+		void PrintKeyType(KeyType keyType)
+		{
+		    std::printf("%s\n", KeyTypeToString(keyType).c_str());
+		}
 
 See also
 --------

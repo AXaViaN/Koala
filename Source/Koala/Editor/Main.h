@@ -25,7 +25,6 @@ public: // Rule of five
 
 private:
 	Tool::Window m_MainWindow;
-	Tool::Window m_TestWindow;
 
 	bool m_CanRun = false;
 

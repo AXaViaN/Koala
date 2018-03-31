@@ -14,6 +14,8 @@ Main::Main()
 		return;
 	}
 
+	Gfx::Renderer::Initialize();
+
 	m_MainWindow.Create("Koala Editor");
 	if(m_MainWindow.IsValid() == false)
 	{
@@ -21,8 +23,6 @@ Main::Main()
 		std::getchar();
 		return;
 	}
-
-	m_TestWindow.Create("test", 800, 600);
 
 	m_CanRun = true;
 }
@@ -37,18 +37,15 @@ void Main::Run()
 	// Main program loop
 	while(m_MainWindow.IsValid())
 	{
-		Tool::Input::Update();
-
-		if(m_TestWindow.IsValid())
-		{
-			m_TestWindow.Activate();
-			Gfx::Renderer::ClearViewport(Gfx::Color(0.8f, 0.2f, 0.4f));
-			m_TestWindow.Update();
-		}
-
 		m_MainWindow.Activate();
+
 		Gfx::Renderer::ClearViewport(Gfx::Color(0.2f, 0.4f, 0.8f));
+		Gfx::Renderer::DrawGuiDemo();
+		Gfx::Renderer::Update();
+
 		m_MainWindow.Update();
+
+		Tool::Input::Update();
 	}
 
 	SendMessage(Service::MessageType::ProgramExit, nullptr);
@@ -69,11 +66,7 @@ void Main::OnInput(Service::InputMessageType type, const Service::InputMessageDa
 	{
 		case Koala::Editor::Service::InputMessageType::KeyPress:
 		{
-			if(data.Key == Tool::KeyType::Space)
-			{
-				m_TestWindow.Destroy();
-			}
-			else if(data.Key == Tool::KeyType::Escape)
+			if(data.Key == Tool::KeyType::Escape)
 			{
 				m_MainWindow.Destroy();
 			}
@@ -99,9 +92,10 @@ void Main::OnInput(Service::InputMessageType type, const Service::InputMessageDa
 
 Main::~Main() noexcept
 {
+	Gfx::Renderer::Terminate();
+
 	// Explicit call to destroy before platform termination.
 	m_MainWindow.Destroy();
-	m_TestWindow.Destroy();
 
 	Tool::PlatformManager::Terminate();
 }

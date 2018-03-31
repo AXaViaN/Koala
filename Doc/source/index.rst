@@ -5,6 +5,8 @@
 
 .. end_of_readme
 
+.. warning:: Development of Koala Documentation has been stopped for a period.
+
 Development Notes
 -----------------
 

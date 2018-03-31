@@ -8,7 +8,13 @@ namespace Koala::Editor::Gfx {
 class Renderer
 {
 public:
+	static void Initialize();
+	static void Terminate();
+
 	static void ClearViewport(const Color& color);
+	static void Update();
+
+	static void DrawGuiDemo();
 
 };
 

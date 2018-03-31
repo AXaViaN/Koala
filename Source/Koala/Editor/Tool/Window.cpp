@@ -2,6 +2,8 @@
 #include <Koala/Editor/Tool/Input.h>
 #include <Koala/Editor/Tool/PlatformManager.h>
 #include <GLFW/glfw3.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw_gl3.h>
 #include <map>
 
 namespace Koala::Editor::Tool {
@@ -44,7 +46,6 @@ void Window::Create(const std::string& title, size_t width, size_t height)
 
 	constexpr int EnableVSYNC = 1;
 	glfwSwapInterval(EnableVSYNC);
-	glfwSetKeyCallback(static_cast<GLFWwindow*>(m_Handle), GlfwKeyCallback);
 	m_Title = title;
 	g_GlfwMap[static_cast<GLFWwindow*>(m_Handle)] = this;
 
@@ -56,6 +57,11 @@ void Window::Create(const std::string& title, size_t width, size_t height)
 	int offsetX = (ScreenWidth - WidthInt) / 2;
 	int offsetY = (ScreenHeight - HeightInt) / 2;
 	glfwSetWindowPos(static_cast<GLFWwindow*>(m_Handle), offsetX, offsetY);
+
+	// First initialize ImGui input handlers (2nd paramater)
+	// and then override with own callback
+	ImGui_ImplGlfwGL3_Init(static_cast<GLFWwindow*>(m_Handle), true);
+	glfwSetKeyCallback(static_cast<GLFWwindow*>(m_Handle), GlfwKeyCallback);
 }
 void Window::Destroy()
 {
@@ -179,11 +185,19 @@ static GLFWwindow* GetSharedContext()
 	return s_MainWindowContext;
 }
 
-static void GlfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int)
+static void GlfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+	// Keyboard callback chain
+	ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+
 	if(g_GlfwMap.find(window) == g_GlfwMap.end())
 	{
 		std::printf("Unregistered window: %p\n", window);
+		return;
+	}
+	else if(ImGui::GetIO().WantCaptureKeyboard)
+	{
+		// If ImGui uses the keyboard input, we will ignore
 		return;
 	}
 

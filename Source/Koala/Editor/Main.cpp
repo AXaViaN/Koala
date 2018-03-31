@@ -19,8 +19,9 @@ Main::Main()
 	m_MainWindow.Create("Koala Editor");
 	if(m_MainWindow.IsValid() == false)
 	{
-		std::printf("Window creation error\n");
-		std::getchar();
+		auto data = GenerateLogMessageData();
+		data.Message = "Window creation error";
+		SendMessage(Service::MessageType::LogError, &data);
 		return;
 	}
 

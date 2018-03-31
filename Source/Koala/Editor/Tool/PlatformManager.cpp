@@ -1,7 +1,7 @@
 #include <Koala/Editor/Tool/PlatformManager.h>
+#include <Koala/Editor/Service/MessageSender.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <cstdio>
 
 namespace Koala::Editor::Tool {
 
@@ -12,8 +12,10 @@ bool PlatformManager::Initialize()
 	glfwSetErrorCallback(GlfwErrorCallback);
 	if(glfwInit() == GLFW_FALSE)
 	{
-		std::printf("Glfw init error\n");
-		std::getchar();
+		auto messageData = GenerateLogMessageData();
+		messageData.Message = "Glfw init error";
+		Instance().SendMessage(Service::MessageType::LogError, &messageData);
+
 		return false;
 	}
 
@@ -29,8 +31,10 @@ bool PlatformManager::InitializeRenderContext()
 	glewExperimental = GL_TRUE;
 	if(glewInit() != GLEW_OK)
 	{
-		std::printf("Glew init error\n");
-		std::getchar();
+		auto messageData = GenerateLogMessageData();
+		messageData.Message = "Glew init error";
+		Instance().SendMessage(Service::MessageType::LogError, &messageData);
+
 		return false;
 	}
 
@@ -44,7 +48,9 @@ void PlatformManager::Terminate()
 
 static void GlfwErrorCallback(int errorCode, const char* errorDesc)
 {
-	std::fprintf(stderr, "GlfwError: %d - %s\n", errorCode, errorDesc);
+	auto messageData = GenerateLogMessageData();
+	messageData.Message = "GlfwError: " + std::to_string(errorCode) + " - " + errorDesc;
+	Service::MessageSender::Send(Service::MessageType::LogError, &messageData);
 }
 
 } // namespace Koala::Editor::Tool

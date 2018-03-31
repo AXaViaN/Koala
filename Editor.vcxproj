@@ -171,6 +171,7 @@
     <ClInclude Include="Source\Koala\Editor\Gfx\Renderer.h" />
     <ClInclude Include="Source\Koala\Editor\Main.h" />
     <ClInclude Include="Source\Koala\Editor\Service\MessageMember.h" />
+    <ClInclude Include="Source\Koala\Editor\Service\MessageSender.h" />
     <ClInclude Include="Source\Koala\Editor\Service\Private\MessageManager.h" />
     <ClInclude Include="Source\Koala\Editor\Service\MessageTypes.h" />
     <ClInclude Include="Source\Koala\Editor\Tool\Input.h" />

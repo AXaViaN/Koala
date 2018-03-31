@@ -1,6 +1,7 @@
 #include <Koala/Editor/Tool/Window.h>
 #include <Koala/Editor/Tool/Input.h>
 #include <Koala/Editor/Tool/PlatformManager.h>
+#include <Koala/Editor/Service/MessageSender.h>
 #include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw_gl3.h>
@@ -192,7 +193,12 @@ static void GlfwKeyCallback(GLFWwindow* window, int key, int scancode, int actio
 
 	if(g_GlfwMap.find(window) == g_GlfwMap.end())
 	{
-		std::printf("Unregistered window: %p\n", window);
+		auto data = GenerateLogMessageData();
+		char msg[128];
+		std::sprintf(msg, "Unregistered window: %p", window);
+		data.Message = msg;
+		Service::MessageSender::Send(Service::MessageType::LogError, &data);
+
 		return;
 	}
 	else if(ImGui::GetIO().WantCaptureKeyboard)
@@ -216,7 +222,10 @@ static void GlfwKeyCallback(GLFWwindow* window, int key, int scancode, int actio
 	}
 	else
 	{
-		std::printf("Unknown glfw action: %d\n", action);
+		auto data = GenerateLogMessageData();
+		data.Message = "Unknown glfw action: " + std::to_string(action);
+		Service::MessageSender::Send(Service::MessageType::LogError, &data);
+
 		return;
 	}
 

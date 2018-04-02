@@ -37,5 +37,9 @@ void Renderer::DrawGuiDemo()
 {
 	ImGui::ShowDemoWindow();
 }
+void Renderer::DrawText(const std::string& text)
+{
+	ImGui::Text(text.c_str());
+}
 
 } // namespace Koala::Editor::Gfx

@@ -2,6 +2,7 @@
 #define KOALA__EDITOR__GFX__RENDERER
 
 #include <Koala/Editor/Gfx/Color.h>
+#include <string>
 
 namespace Koala::Editor::Gfx {
 
@@ -15,6 +16,7 @@ public:
 	static void Update();
 
 	static void DrawGuiDemo();
+	static void DrawText(const std::string& text);
 
 };
 

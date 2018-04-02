@@ -155,11 +155,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Koala\Editor\Application.cpp" />
+    <ClCompile Include="Source\Koala\Editor\CodeBoard.cpp" />
+    <ClCompile Include="Source\Koala\Editor\ControlPanel.cpp" />
+    <ClCompile Include="Source\Koala\Editor\Details.cpp" />
     <ClCompile Include="Source\Koala\Editor\Gfx\Color.cpp" />
+    <ClCompile Include="Source\Koala\Editor\Gfx\Panel.cpp" />
     <ClCompile Include="Source\Koala\Editor\Gfx\Renderer.cpp" />
     <ClCompile Include="Source\Koala\Editor\Main.cpp" />
+    <ClCompile Include="Source\Koala\Editor\Palette.cpp" />
     <ClCompile Include="Source\Koala\Editor\Service\MessageMember.cpp" />
     <ClCompile Include="Source\Koala\Editor\Service\Private\MessageManager.cpp" />
+    <ClCompile Include="Source\Koala\Editor\ToolBar.cpp" />
     <ClCompile Include="Source\Koala\Editor\Tool\Input.cpp" />
     <ClCompile Include="Source\Koala\Editor\Tool\PlatformManager.cpp" />
     <ClCompile Include="Source\Koala\Editor\Tool\Private\Console.cpp" />
@@ -167,13 +173,20 @@
     <ClCompile Include="Source\Koala\Editor\Tool\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Koala\Editor\CodeBoard.h" />
+    <ClInclude Include="Source\Koala\Editor\ControlPanel.h" />
+    <ClInclude Include="Source\Koala\Editor\Details.h" />
     <ClInclude Include="Source\Koala\Editor\Gfx\Color.h" />
+    <ClInclude Include="Source\Koala\Editor\Gfx\Panel.h" />
     <ClInclude Include="Source\Koala\Editor\Gfx\Renderer.h" />
+    <ClInclude Include="Source\Koala\Editor\Gfx\Vector2.h" />
     <ClInclude Include="Source\Koala\Editor\Main.h" />
+    <ClInclude Include="Source\Koala\Editor\Palette.h" />
     <ClInclude Include="Source\Koala\Editor\Service\MessageMember.h" />
     <ClInclude Include="Source\Koala\Editor\Service\MessageSender.h" />
     <ClInclude Include="Source\Koala\Editor\Service\Private\MessageManager.h" />
     <ClInclude Include="Source\Koala\Editor\Service\MessageTypes.h" />
+    <ClInclude Include="Source\Koala\Editor\ToolBar.h" />
     <ClInclude Include="Source\Koala\Editor\Tool\Input.h" />
     <ClInclude Include="Source\Koala\Editor\Tool\PlatformManager.h" />
     <ClInclude Include="Source\Koala\Editor\Tool\Private\Console.h" />

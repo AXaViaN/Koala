@@ -1,4 +1,9 @@
 #include <Koala/Editor/Main.h>
+#include <Koala/Editor/CodeBoard.h>
+#include <Koala/Editor/ToolBar.h>
+#include <Koala/Editor/ControlPanel.h>
+#include <Koala/Editor/Details.h>
+#include <Koala/Editor/Palette.h>
 #include <Koala/Editor/Gfx/Renderer.h>
 #include <Koala/Editor/Tool/Input.h>
 #include <Koala/Editor/Tool/PlatformManager.h>
@@ -35,13 +40,32 @@ void Main::Run()
 		return;
 	}
 
+	CodeBoard codeBoard(m_MainWindow);
+	ToolBar toolBar(m_MainWindow);
+	ControlPanel controlPanel(m_MainWindow);
+	Details details(m_MainWindow);
+	Palette palette(m_MainWindow);
+	Gfx::Panel* panels[] = {
+		&codeBoard,
+		&toolBar,
+		&controlPanel,
+		&details,
+		&palette
+	};
+
 	// Main program loop
 	while(m_MainWindow.IsValid())
 	{
 		m_MainWindow.Activate();
 
 		Gfx::Renderer::ClearViewport(Gfx::Color(0.2f, 0.4f, 0.8f));
+		for( auto& panel : panels )
+		{
+			panel->Update();
+		}
+	#if 0
 		Gfx::Renderer::DrawGuiDemo();
+	#endif
 		Gfx::Renderer::Update();
 
 		m_MainWindow.Update();

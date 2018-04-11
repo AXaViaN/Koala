@@ -1,12 +1,13 @@
 #ifndef KOALA__EDITOR__GFX__PANEL
 #define KOALA__EDITOR__GFX__PANEL
 
+#include <Koala/Editor/Service/MessageMember.h>
 #include <Koala/Editor/Gfx/Vector2.h>
 #include <Koala/Editor/Tool/Window.h>
 
 namespace Koala::Editor::Gfx {
 
-class Panel
+class Panel : protected Service::MessageMember
 {
 public:
 	Panel(const Tool::Window& window, Vector2 startPoint, Vector2 endPoint);
@@ -23,9 +24,16 @@ public: // Rule of five
 protected:
 	virtual void OnGui() = 0;
 
+	virtual void OnMessage(Service::MessageType type, void* data) override
+	{ }
+	virtual void OnInput(Service::InputMessageType type, const Service::InputMessageData& data) override
+	{ }
+
+	void DisableScrollBar();
+
 	static const Gfx::Vector2& CodeBoardStartPosition()
 	{
-		static const Gfx::Vector2 startPosition(0.15f, 0.1f);
+		static const Gfx::Vector2 startPosition(0.15f, 0.05f);
 		return startPosition;
 	}
 	static const Gfx::Vector2& CodeBoardEndPosition()
@@ -39,6 +47,8 @@ private:
 
 	Vector2 m_StartPoint;
 	Vector2 m_EndPoint;
+
+	unsigned int m_AdditionalFlags = 0;
 
 };
 

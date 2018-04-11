@@ -11,7 +11,21 @@ ControlPanel::ControlPanel(const Tool::Window& window) :
 
 void ControlPanel::OnGui()
 {
-	Gfx::Renderer::DrawText("Control Panel");
+	using namespace Gfx;
+
+	Renderer::DrawButton(Utility::Text::ControlPanel, {1.0f, 0.08f});
+	Renderer::Spacing(2);
+
+	if(Renderer::DrawTree(Utility::Text::Functions))
+	{
+		
+		Renderer::EndTree();
+	}
+	if(Renderer::DrawTree(Utility::Text::Variables))
+	{
+
+		Renderer::EndTree();
+	}
 }
 
 } // namespace Koala::Editor

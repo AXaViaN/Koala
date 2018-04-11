@@ -11,7 +11,9 @@ Details::Details(const Tool::Window& window) :
 
 void Details::OnGui()
 {
-	Gfx::Renderer::DrawText("Details");
+	using namespace Gfx;
+
+	Renderer::DrawButton(Utility::Text::Details, {1.0f, 0.08f});
 }
 
 } // namespace Koala::Editor

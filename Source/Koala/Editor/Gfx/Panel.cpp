@@ -23,11 +23,18 @@ void Panel::Update()
 				 ImGuiWindowFlags_NoCollapse | 
 				 ImGuiWindowFlags_NoMove | 
 				 ImGuiWindowFlags_NoResize | 
-				 ImGuiWindowFlags_NoTitleBar);
+				 ImGuiWindowFlags_NoTitleBar | 
+				 m_AdditionalFlags);
 	{
+		ImGui::SetCursorPos({0, 0});
 		OnGui();
 	}
 	ImGui::End();
+}
+
+void Panel::DisableScrollBar()
+{
+	m_AdditionalFlags |= ImGuiWindowFlags_NoScrollbar;
 }
 
 } // namespace Koala::Editor::Gfx

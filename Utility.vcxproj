@@ -25,12 +25,14 @@
     <ClInclude Include="Source\Koala\Utility\Logger.h" />
     <ClInclude Include="Source\Koala\Utility\Macro.h" />
     <ClInclude Include="Source\Koala\Utility\Platform.h" />
+    <ClInclude Include="Source\Koala\Utility\Resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Koala\Utility\Clock.cpp" />
     <ClCompile Include="Source\Koala\Utility\Date.cpp" />
     <ClCompile Include="Source\Koala\Utility\File.cpp" />
     <ClCompile Include="Source\Koala\Utility\Logger.cpp" />
+    <ClCompile Include="Source\Koala\Utility\Resource.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -110,6 +112,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;KOALA_UTILITY;KOALA_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\glew-2.1.0\include;$(SolutionDir)ThirdParty\stb_image-2.19\include</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -119,6 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;KOALA_UTILITY;KOALA_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\glew-2.1.0\include;$(SolutionDir)ThirdParty\stb_image-2.19\include</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -130,6 +134,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;KOALA_UTILITY;KOALA_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\glew-2.1.0\include;$(SolutionDir)ThirdParty\stb_image-2.19\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -145,6 +150,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;KOALA_UTILITY;KOALA_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\glew-2.1.0\include;$(SolutionDir)ThirdParty\stb_image-2.19\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

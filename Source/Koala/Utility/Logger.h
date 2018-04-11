@@ -2,6 +2,7 @@
 #define KOALA__UTILITY__LOGGER
 
 #include <Koala/Utility/File.h>
+#include <Koala/Utility/Resource.h>
 #include <string>
 
 #define LogInfo(message) \
@@ -39,9 +40,7 @@ private:
 	}
 
 private:
-	const std::string LogFilePath = "Data/user.log";
-
-	File m_LogFile = File(LogFilePath);
+	File m_LogFile = File(Resource::LogFilePath());
 	
 };
 

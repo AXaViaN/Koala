@@ -15,11 +15,11 @@ void ToolBar::OnGui()
 {
 	using namespace Gfx;
 
-	const Vector2 ButtonSize = {0.02f, 0.75f};
+	const float ButtonHeight = 0.75f;
 	const Color ButtonColor = Color(0.75f, 0.75f, 0.75f);
 
 	Renderer::SetCursorPosition({0.005f, 0.07f});
-	if(Renderer::DrawIconButton(Utility::Icon::New, ButtonSize, ButtonColor))
+	if(Renderer::DrawIconButton(Utility::Icon::New, ButtonHeight, ButtonColor))
 	{
 		auto data = GenerateLogMessageData();
 		data.Message = "New button is pressed!";
@@ -27,7 +27,7 @@ void ToolBar::OnGui()
 		SendMessage(Service::MessageType::LogInfo, &data);
 	}
 	Renderer::DrawSameLine();
-	if(Renderer::DrawIconButton(Utility::Icon::Open, ButtonSize, ButtonColor))
+	if(Renderer::DrawIconButton(Utility::Icon::Open, ButtonHeight, ButtonColor))
 	{
 		auto data = GenerateLogMessageData();
 		data.Message = "Open button is pressed!";
@@ -35,7 +35,7 @@ void ToolBar::OnGui()
 		SendMessage(Service::MessageType::LogInfo, &data);
 	}
 	Renderer::DrawSameLine();
-	if(Renderer::DrawIconButton(Utility::Icon::Save, ButtonSize, ButtonColor))
+	if(Renderer::DrawIconButton(Utility::Icon::Save, ButtonHeight, ButtonColor))
 	{
 		auto data = GenerateLogMessageData();
 		data.Message = "Save button is pressed!";
@@ -43,7 +43,7 @@ void ToolBar::OnGui()
 		SendMessage(Service::MessageType::LogInfo, &data);
 	}
 	Renderer::DrawSameLine();
-	if(Renderer::DrawIconButton(Utility::Icon::Settings, ButtonSize, ButtonColor))
+	if(Renderer::DrawIconButton(Utility::Icon::Settings, ButtonHeight, ButtonColor))
 	{
 		auto data = GenerateLogMessageData();
 		data.Message = "Settings button is pressed!";
@@ -51,20 +51,24 @@ void ToolBar::OnGui()
 		SendMessage(Service::MessageType::LogInfo, &data);
 	}
 
-	const float CompileButtonPosX = 0.5f - ButtonSize.GetX();
-	Renderer::SetCursorPosition({CompileButtonPosX, 0.07f});
-	if(Renderer::DrawIconButton(Utility::Icon::Compile, ButtonSize, ButtonColor))
-	{
-		auto data = GenerateLogMessageData();
-		data.Message = "Compile button is pressed!";
-
-		SendMessage(Service::MessageType::LogInfo, &data);
-	}
-	Renderer::DrawSameLine();
-	if(Renderer::DrawIconButton(Utility::Icon::Run, ButtonSize, ButtonColor))
+	const Vector2 ScreenMiddle = {0.5f, 0.07f};
+	Renderer::SetCursorPosition(ScreenMiddle);
+	if(Renderer::DrawIconButton(Utility::Icon::Run, ButtonHeight, ButtonColor))
 	{
 		auto data = GenerateLogMessageData();
 		data.Message = "Run button is pressed!";
+
+		SendMessage(Service::MessageType::LogInfo, &data);
+	}
+	{
+		Renderer::DrawSameLine();
+		const float NextPositionX = 2*ScreenMiddle.GetX() - Renderer::GetCursorPosition().GetX();
+		Renderer::SetCursorPosition({NextPositionX, ScreenMiddle.GetY()});
+	}
+	if(Renderer::DrawIconButton(Utility::Icon::Compile, ButtonHeight, ButtonColor))
+	{
+		auto data = GenerateLogMessageData();
+		data.Message = "Compile button is pressed!";
 
 		SendMessage(Service::MessageType::LogInfo, &data);
 	}

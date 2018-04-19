@@ -47,14 +47,6 @@ void Renderer::DrawGuiDemo()
 	ImGui::ShowDemoWindow();
 }
 
-void Renderer::SetCursorPosition(const Vector2& position)
-{
-	ImVec2 pos;
-	pos.x = ImGui::GetWindowSize().x * position.GetX();
-	pos.y = ImGui::GetWindowSize().y * position.GetY();
-
-	ImGui::SetCursorPos(pos);
-}
 void Renderer::DrawSameLine(float spacing)
 {
 	ImGui::SameLine(0.0f, ImGui::GetWindowSize().x * spacing);
@@ -69,6 +61,22 @@ void Renderer::Spacing(size_t count)
 void Renderer::DrawSeperator()
 {
 	ImGui::Separator();
+}
+void Renderer::SetCursorPosition(const Vector2& position)
+{
+	ImVec2 pos;
+	pos.x = ImGui::GetWindowSize().x * position.GetX();
+	pos.y = ImGui::GetWindowSize().y * position.GetY();
+
+	ImGui::SetCursorPos(pos);
+}
+Vector2 Renderer::GetCursorPosition()
+{
+	Vector2 pos;
+	pos.SetX(ImGui::GetCursorPos().x / ImGui::GetWindowSize().x);
+	pos.SetY(ImGui::GetCursorPos().y / ImGui::GetWindowSize().y);
+
+	return pos;
 }
 
 void Renderer::DrawText(const std::string& str)
@@ -102,6 +110,11 @@ bool Renderer::DrawButton(const std::string& str, const Vector2& size, bool high
 bool Renderer::DrawButton(Utility::Text text, const Vector2& size, bool highlight)
 {
 	return DrawButton(Utility::Resource::GetText(text), size, highlight);
+}
+bool Renderer::DrawIconButton(Utility::Icon icon, float height, const Color& bgColor)
+{
+	float width = (height * ImGui::GetWindowSize().y) / ImGui::GetWindowSize().x;
+	return DrawIconButton(icon, Vector2(width, height), bgColor);
 }
 bool Renderer::DrawIconButton(Utility::Icon icon, const Vector2& size, const Color& bgColor)
 {

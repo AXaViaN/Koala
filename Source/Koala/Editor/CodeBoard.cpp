@@ -5,34 +5,33 @@ namespace Koala::Editor {
 
 CodeBoard::CodeBoard(const Tool::Window& window) :
 	Gfx::Panel(window, CodeBoardStartPosition(), CodeBoardEndPosition())
-{ }
+{
+	m_FunctionList.emplace_back(Utility::Resource::GetText(Utility::Text::Program));
+	m_SelectedFunction = 0;
+}
 
 void CodeBoard::OnGui()
 {
 	using namespace Gfx;
 
-	static bool selection = true;
+	// Draw buttons
+	const size_t FunctionCount = m_FunctionList.size();
+	const float ButtonSpacing = 0.001f;
+	const float ButtonWidth = 1.0f/FunctionCount - ButtonSpacing;
+	Vector2 cursorPosition;
+	for( size_t i=0 ; i<FunctionCount ; ++i )
+	{
+		if(Renderer::DrawButton(m_FunctionList[i], {ButtonWidth, 0.04f}, m_SelectedFunction==i))
+		{
+			m_SelectedFunction = i;
+		}
+		cursorPosition = Renderer::GetCursorPosition();
+		Renderer::DrawSameLine(ButtonSpacing);
+	}
 
-	if(Renderer::DrawButton(Utility::Text::Program, {0.5f, 0.04f}, selection))
-	{
-		selection = true;
-	}
-	Renderer::DrawSameLine();
-	if(Renderer::DrawButton("Faktoriyel", {0.5f, 0.04f}, selection==false))
-	{
-		selection = false;
-	}
-
-	if(selection)
-	{
-		Renderer::SetCursorPosition({0.425f, 0.5f});
-		Renderer::DrawText("Main program kodu");
-	}
-	else
-	{
-		Renderer::SetCursorPosition({0.4f, 0.5f});
-		Renderer::DrawText("Faktoriyel fonksiyon kodu");
-	}
+	// Button logic
+	Renderer::SetCursorPosition(cursorPosition);
+	Renderer::DrawText(m_FunctionList[m_SelectedFunction] + " code here.");
 }
 
 } // namespace Koala::Editor

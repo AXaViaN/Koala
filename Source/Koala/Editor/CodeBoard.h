@@ -2,6 +2,8 @@
 #define KOALA__EDITOR__CODE_BOARD
 
 #include <Koala/Editor/Gfx/Panel.h>
+#include <vector>
+#include <string>
 
 namespace Koala::Editor {
 
@@ -12,6 +14,10 @@ public:
 
 private:
 	virtual void OnGui() override;
+
+private:
+	std::vector<std::string> m_FunctionList;
+	size_t m_SelectedFunction;
 
 };
 

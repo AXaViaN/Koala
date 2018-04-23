@@ -20,8 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Koala\Utility\Clock.h" />
+    <ClInclude Include="Source\Koala\Utility\Core\FunctionManager.h" />
+    <ClInclude Include="Source\Koala\Utility\Core\Node.h" />
+    <ClInclude Include="Source\Koala\Utility\Core\Slot.h" />
+    <ClInclude Include="Source\Koala\Utility\Core\Variable.h" />
     <ClInclude Include="Source\Koala\Utility\Date.h" />
     <ClInclude Include="Source\Koala\Utility\File.h" />
+    <ClInclude Include="Source\Koala\Utility\IDGenerator.h" />
     <ClInclude Include="Source\Koala\Utility\Logger.h" />
     <ClInclude Include="Source\Koala\Utility\Macro.h" />
     <ClInclude Include="Source\Koala\Utility\Platform.h" />
@@ -29,6 +34,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Koala\Utility\Clock.cpp" />
+    <ClCompile Include="Source\Koala\Utility\Core\FunctionManager.cpp" />
+    <ClCompile Include="Source\Koala\Utility\Core\Node.cpp" />
     <ClCompile Include="Source\Koala\Utility\Date.cpp" />
     <ClCompile Include="Source\Koala\Utility\File.cpp" />
     <ClCompile Include="Source\Koala\Utility\Logger.cpp" />

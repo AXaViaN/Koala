@@ -36,6 +36,21 @@
     <ClInclude Include="Source\Koala\Utility\Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Koala\Utility\Core\Variable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Koala\Utility\IDGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Koala\Utility\Core\FunctionManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Koala\Utility\Core\Node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Koala\Utility\Core\Slot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Koala\Utility\File.cpp">
@@ -51,6 +66,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Koala\Utility\Resource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Koala\Utility\Core\FunctionManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Koala\Utility\Core\Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

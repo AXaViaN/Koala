@@ -2,11 +2,48 @@
 #include <GL/glew.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw_gl3.h>
+#include <algorithm>
 
 namespace Koala::Editor::Gfx {
 
-static ImVec2 GetImVec2(const Vector2& vec);
-static ImVec4 GetImVec4(const Color& color);
+static const Color ErrorColor = Color(1.0f, 0.0f, 1.0f);
+static ImVec2 GetImVec2(const Vector2& vec)
+{
+	return {vec.GetX(), vec.GetY()};
+}
+static ImVec4 GetImVec4(const Color& color)
+{
+	return {color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha()};
+}
+static ImU32 GetImU32(const Color& color)
+{
+	return IM_COL32(color.GetRed()*255, color.GetGreen()*255, color.GetBlue()*255, color.GetAlpha()*255);
+}
+static ImVec2 GetRealImVec(const Vector2& vec)
+{
+	return {ImGui::GetWindowSize().x * vec.GetX(), 
+			ImGui::GetWindowSize().y * vec.GetY()};
+}
+static ImVec2 operator+(const ImVec2& first, const ImVec2& second)
+{
+	return {first.x + second.x, 
+			first.y + second.y};
+}
+static ImVec2& operator+=(ImVec2& first, const ImVec2& second)
+{
+	first = first + second;
+	return first;
+}
+static ImVec2 operator-(const ImVec2& first, const ImVec2& second)
+{
+	return {first.x - second.x, 
+			first.y - second.y};
+}
+static ImVec2& operator-=(ImVec2& first, const ImVec2& second)
+{
+	first = first - second;
+	return first;
+}
 
 void Renderer::Initialize()
 {
@@ -31,7 +68,7 @@ void Renderer::Terminate()
 
 void Renderer::ClearViewport(const Color& color)
 {
-	glClearColor(color.r, color.g, color.b, color.a);
+	glClearColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	ImGui_ImplGlfwGL3_NewFrame();
@@ -64,11 +101,7 @@ void Renderer::DrawSeperator()
 }
 void Renderer::SetCursorPosition(const Vector2& position)
 {
-	ImVec2 pos;
-	pos.x = ImGui::GetWindowSize().x * position.GetX();
-	pos.y = ImGui::GetWindowSize().y * position.GetY();
-
-	ImGui::SetCursorPos(pos);
+	ImGui::SetCursorPos(GetRealImVec(position));
 }
 Vector2 Renderer::GetCursorPosition()
 {
@@ -123,7 +156,7 @@ bool Renderer::DrawIconButton(Utility::Icon icon, const Vector2& size, const Col
 	buttonSize.y = ImGui::GetWindowSize().y * size.GetY();
 
 	ImVec4 backgroundColor = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
-	if(bgColor.a > 0.0f)
+	if(bgColor.GetAlpha() > 0.0f)
 	{
 		backgroundColor = GetImVec4(bgColor);
 	}
@@ -164,13 +197,120 @@ void Renderer::EndTree()
 	ImGui::TreePop();
 }
 
-static ImVec2 GetImVec2(const Vector2& vec)
+void Renderer::DrawNode(const Utility::Core::Node& node, const Vector2& position)
 {
-	return {vec.GetX(), vec.GetY()};
-}
-static ImVec4 GetImVec4(const Color& color)
-{
-	return {color.r, color.g, color.b, color.a};
+	static const Vector2 NodeBaseSize = Vector2(0.25f, 0.075f);
+	static const float NodeItemHeight = 0.05f;
+
+	const float SlotHeight = ImGui::GetWindowSize().y * NodeItemHeight;
+
+	ImVec2 nodeSize = GetRealImVec(NodeBaseSize);
+	nodeSize.y += std::max(node.GetBackSlots().size(), node.GetFrontSlots().size()) * SlotHeight;
+	
+	ImGui::PushID(&node);
+	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0.5));
+	SetCursorPosition(position);
+	ImGui::BeginChild(node.GetName().c_str(), nodeSize, true, 
+					  ImGuiWindowFlags_AlwaysAutoResize | 
+					  ImGuiWindowFlags_NoCollapse | 
+					  ImGuiWindowFlags_NoTitleBar | 
+					  ImGuiWindowFlags_NoScrollbar);
+	{
+		ImGui::Text(node.GetName().c_str());
+
+		Spacing();
+		DrawSeperator();
+		Spacing(4);
+
+		const Vector2 SlotStartPosition = GetCursorPosition();
+
+		enum class SlotSide
+		{
+			Front,
+			Back
+		};
+		auto drawSlots = [&SlotStartPosition, &SlotHeight](const std::vector<Utility::Core::Slot> slots, SlotSide slotSide)
+		{
+			for( size_t i=0 ; i<slots.size() ; ++i )
+			{
+				auto& slot = slots[i];
+
+				ImGui::PushID(&slot);
+
+				bool isFlow = false;
+				ImU32 slotColor;
+				ImVec2 slotPosition = ImGui::GetWindowPos();
+				if(slotSide == SlotSide::Back)
+				{
+					slotPosition += GetRealImVec(SlotStartPosition);
+				}
+				else
+				{
+					auto startPositionX = 1.0f - SlotStartPosition.GetX();
+					slotPosition += GetRealImVec({startPositionX, SlotStartPosition.GetY()});
+					slotPosition.x -= SlotHeight / 2.0f;
+				}
+				slotPosition.y += i * SlotHeight;
+
+				// Select color based on the variable type
+				auto& slotVariableType = slot.GetVariable().GetVariableType();
+				if(slotVariableType == Utility::Core::VariableType::None)
+				{
+					// It is a flow
+					slotColor = GetImU32(Color(1.0f, 1.0f, 1.0f));
+					isFlow = true;
+				}
+				else if(slotVariableType == Utility::Core::VariableType::Float64)
+				{
+					slotColor = GetImU32(Color(0.5f, 0.7f, 1.0f));
+				}
+				else if(slotVariableType == Utility::Core::VariableType::String)
+				{
+					slotColor = GetImU32(Color(0.5f, 1.0f, 0.7f));
+				}
+				else
+				{
+					slotColor = GetImU32(ErrorColor);
+				}
+				
+				// Draw slot port
+				if(isFlow)
+				{
+					auto position0 = slotPosition;
+					auto position1 = slotPosition + ImVec2(SlotHeight/2.0f, SlotHeight/2.0f);
+					if(slot.IsConnected())
+					{
+						ImGui::GetWindowDrawList()->AddRectFilled(position0, position1, slotColor);
+					}
+					else
+					{
+						ImGui::GetWindowDrawList()->AddRect(position0, position1, slotColor);
+					}
+				}
+				else
+				{
+					auto radius = SlotHeight / 4.0f;
+					auto position = slotPosition + ImVec2(radius, radius);
+					if(slot.IsConnected())
+					{
+						ImGui::GetWindowDrawList()->AddCircleFilled(position, radius, slotColor);
+					}
+					else
+					{
+						ImGui::GetWindowDrawList()->AddCircle(position, radius, slotColor);
+					}
+				}
+				
+				ImGui::PopID();
+			}
+		};
+
+		drawSlots(node.GetFrontSlots(), SlotSide::Front);
+		drawSlots(node.GetBackSlots(), SlotSide::Back);
+	}
+	ImGui::EndChild();
+	ImGui::PopStyleColor();
+	ImGui::PopID();
 }
 
 } // namespace Koala::Editor::Gfx

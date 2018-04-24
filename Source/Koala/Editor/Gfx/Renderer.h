@@ -4,6 +4,7 @@
 #include <Koala/Editor/Gfx/Color.h>
 #include <Koala/Editor/Gfx/Vector2.h>
 #include <Koala/Utility/Resource.h>
+#include <Koala/Utility/Core/Node.h>
 #include <string>
 
 namespace Koala::Editor::Gfx {
@@ -36,6 +37,8 @@ public:
 
 	static bool DrawTree(Utility::Text text);
 	static void EndTree();
+
+	static void DrawNode(const Utility::Core::Node& node, const Vector2& position);
 
 };
 

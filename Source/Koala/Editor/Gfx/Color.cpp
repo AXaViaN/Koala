@@ -1,13 +1,10 @@
 #include <Koala/Editor/Gfx/Color.h>
 #include <utility>
+#include <algorithm>
 
 namespace Koala::Editor::Gfx {
 
-Color::Color(float red, float green, float blue, float alpha) : 
-	r(m_RGBA[0]), 
-	g(m_RGBA[1]), 
-	b(m_RGBA[2]), 
-	a(m_RGBA[3])
+Color::Color(float red, float green, float blue, float alpha)
 {
 	m_RGBA[0] = red;
 	m_RGBA[1] = green;
@@ -15,31 +12,56 @@ Color::Color(float red, float green, float blue, float alpha) :
 	m_RGBA[3] = alpha;
 }
 
-void Color::Clamp()
+void Color::SetRed(float value)
 {
-	constexpr float DefaultRange0 = 0.0f;
-	constexpr float DefaultRange1 = 1.0f;
-	Clamp(DefaultRange0, DefaultRange1);
+	std::clamp(value, 0.0f, 1.0f);
+	m_RGBA[0] = value;
 }
+void Color::SetGreen(float value)
+{
+	std::clamp(value, 0.0f, 1.0f);
+	m_RGBA[1] = value;
+}
+void Color::SetBlue(float value)
+{
+	std::clamp(value, 0.0f, 1.0f);
+	m_RGBA[2] = value;
+}
+void Color::SetAlpha(float value)
+{
+	std::clamp(value, 0.0f, 1.0f);
+	m_RGBA[3] = value;
+}
+float Color::GetRed() const
+{
+	return m_RGBA[0];
+}
+float Color::GetGreen() const
+{
+	return m_RGBA[1];
+}
+float Color::GetBlue() const
+{
+	return m_RGBA[2];
+}
+float Color::GetAlpha() const
+{
+	return m_RGBA[3];
+}
+
 void Color::Clamp(float range0, float range1)
 {
 	// Make range0 lower point
 	if(range1 < range0)
 	{
-		float tmp = std::move(range0);
 		std::swap(range0, range1);
 	}
+	std::clamp(range0, 0.0f, 1.0f);
+	std::clamp(range1, 0.0f, 1.0f);
 
 	for( auto& color : m_RGBA )
 	{
-		if(color < range0)
-		{
-			color = range0;
-		}
-		else if(color > range1)
-		{
-			color = range1;
-		}
+		std::clamp(color, range0, range1);
 	}
 }
 

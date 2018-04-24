@@ -5,11 +5,6 @@ namespace Koala::Editor::Gfx {
 
 struct Color
 {
-	float& r;
-	float& g;
-	float& b;
-	float& a;
-
 public:
 	Color() : 
 		Color(0.0f, 0.0f, 0.0f, 1.0f)
@@ -19,7 +14,15 @@ public:
 	{ }
 	Color(float red, float green, float blue, float alpha);
 
-	void Clamp();
+	void SetRed(float value);
+	void SetGreen(float value);
+	void SetBlue(float value);
+	void SetAlpha(float value);
+	float GetRed() const;
+	float GetGreen() const;
+	float GetBlue() const;
+	float GetAlpha() const;
+
 	void Clamp(float range0, float range1);
 
 private:

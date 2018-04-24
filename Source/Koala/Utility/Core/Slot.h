@@ -30,6 +30,10 @@ public:
 	{
 		return m_Variable;
 	}
+	const Variable& GetVariable() const
+	{
+		return m_Variable;
+	}
 	const Port& GetPort() const
 	{
 		return m_Port;

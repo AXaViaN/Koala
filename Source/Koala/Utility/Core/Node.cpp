@@ -52,4 +52,13 @@ const std::vector<Slot>& Node::GetFrontSlots() const
 	return m_FrontSlots;
 }
 
+std::vector<Slot>& Node::GetBackSlots()
+{
+	return m_BackSlots;
+}
+std::vector<Slot>& Node::GetFrontSlots()
+{
+	return m_FrontSlots;
+}
+
 } // namespace Koala::Utility::Core

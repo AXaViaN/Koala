@@ -38,7 +38,7 @@ public:
 	static bool DrawTree(Utility::Text text);
 	static void EndTree();
 
-	static void DrawNode(const Utility::Core::Node& node, const Vector2& position);
+	static void DrawNode(Utility::Core::Node& node, const Vector2& position);
 
 };
 

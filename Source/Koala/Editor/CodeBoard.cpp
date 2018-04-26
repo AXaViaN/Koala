@@ -52,17 +52,18 @@ static void SetupDefaultFunctions(Utility::Core::Node& programNode)
 		Utility::Core::FunctionInfo functionInfo;
 		functionInfo.NameText = Utility::Text::Program;
 		functionInfo.FrontSlots.emplace_back("1", Utility::Core::VariableType::None);
-		functionInfo.FrontSlots.emplace_back("2", Utility::Core::VariableType::None);
-		functionInfo.BackSlots.emplace_back("3", Utility::Core::VariableType::None);
+		functionInfo.FrontSlots.emplace_back("2", Utility::Core::VariableType::Float64);
+		functionInfo.BackSlots.emplace_back("3", Utility::Core::VariableType::String);
 		functionInfo.FrontSlots.emplace_back("4", Utility::Core::VariableType::None);
 		functionInfo.BackSlots.emplace_back("5", Utility::Core::VariableType::None);
-		functionInfo.FrontSlots.emplace_back("6", Utility::Core::VariableType::None);
-		functionInfo.FrontSlots.emplace_back("7", Utility::Core::VariableType::None);
-		functionInfo.BackSlots.emplace_back("8", Utility::Core::VariableType::None);
+		functionInfo.FrontSlots.emplace_back("example", Utility::Core::VariableType::String);
+		functionInfo.FrontSlots.emplace_back("very long variable name", Utility::Core::VariableType::Float64);
+		functionInfo.BackSlots.emplace_back("8", Utility::Core::VariableType::String);
 		functionInfo.FrontSlots.emplace_back("9", Utility::Core::VariableType::None);
 		functionInfo.FrontSlots.emplace_back("10", Utility::Core::VariableType::None);
-		functionInfo.BackSlots.emplace_back("11", Utility::Core::VariableType::None);
-		functionInfo.FrontSlots.emplace_back("12", Utility::Core::VariableType::None);
+		functionInfo.BackSlots.emplace_back("11", Utility::Core::VariableType::Float64);
+		functionInfo.FrontSlots.emplace_back("12", Utility::Core::VariableType::Float64);
+		functionInfo.BackSlots.emplace_back("long name", Utility::Core::VariableType::Float64);
 
 		size_t programFunctionID = Utility::Core::FunctionManager::Add(functionInfo);
 		programNode = Utility::Core::Node(programFunctionID);

@@ -24,6 +24,11 @@ static ImVec2 GetRealImVec(const Vector2& vec)
 	return {ImGui::GetWindowSize().x * vec.GetX(), 
 			ImGui::GetWindowSize().y * vec.GetY()};
 }
+static Vector2 GetLogicalVector2(const ImVec2& vec)
+{
+	return {vec.x / ImGui::GetWindowSize().x, 
+			vec.y / ImGui::GetWindowSize().y};
+}
 static ImVec2 operator+(const ImVec2& first, const ImVec2& second)
 {
 	return {first.x + second.x, 
@@ -197,10 +202,10 @@ void Renderer::EndTree()
 	ImGui::TreePop();
 }
 
-void Renderer::DrawNode(const Utility::Core::Node& node, const Vector2& position)
+void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 {
-	static const Vector2 NodeBaseSize = Vector2(0.25f, 0.075f);
-	static const float NodeItemHeight = 0.05f;
+	static const Vector2 NodeBaseSize = Vector2(0.3f, 0.075f);
+	static const float NodeItemHeight = 0.04f;
 
 	const float SlotHeight = ImGui::GetWindowSize().y * NodeItemHeight;
 
@@ -229,7 +234,7 @@ void Renderer::DrawNode(const Utility::Core::Node& node, const Vector2& position
 			Front,
 			Back
 		};
-		auto drawSlots = [&SlotStartPosition, &SlotHeight](const std::vector<Utility::Core::Slot> slots, SlotSide slotSide)
+		auto drawSlots = [&SlotStartPosition, &SlotHeight](std::vector<Utility::Core::Slot>& slots, SlotSide slotSide)
 		{
 			for( size_t i=0 ; i<slots.size() ; ++i )
 			{
@@ -238,7 +243,7 @@ void Renderer::DrawNode(const Utility::Core::Node& node, const Vector2& position
 				ImGui::PushID(&slot);
 
 				bool isFlow = false;
-				ImU32 slotColor;
+				Color slotColor;
 				ImVec2 slotPosition = ImGui::GetWindowPos();
 				if(slotSide == SlotSide::Back)
 				{
@@ -257,20 +262,20 @@ void Renderer::DrawNode(const Utility::Core::Node& node, const Vector2& position
 				if(slotVariableType == Utility::Core::VariableType::None)
 				{
 					// It is a flow
-					slotColor = GetImU32(Color(1.0f, 1.0f, 1.0f));
+					slotColor = Color(1.0f, 1.0f, 1.0f);
 					isFlow = true;
 				}
 				else if(slotVariableType == Utility::Core::VariableType::Float64)
 				{
-					slotColor = GetImU32(Color(0.5f, 0.7f, 1.0f));
+					slotColor = Color(0.5f, 0.7f, 1.0f);
 				}
 				else if(slotVariableType == Utility::Core::VariableType::String)
 				{
-					slotColor = GetImU32(Color(0.5f, 1.0f, 0.7f));
+					slotColor = Color(0.5f, 1.0f, 0.7f);
 				}
 				else
 				{
-					slotColor = GetImU32(ErrorColor);
+					slotColor = ErrorColor;
 				}
 				
 				// Draw slot port
@@ -278,29 +283,106 @@ void Renderer::DrawNode(const Utility::Core::Node& node, const Vector2& position
 				{
 					auto position0 = slotPosition;
 					auto position1 = slotPosition + ImVec2(SlotHeight/2.0f, SlotHeight/2.0f);
+					auto color = GetImU32(slotColor);
 					if(slot.IsConnected())
 					{
-						ImGui::GetWindowDrawList()->AddRectFilled(position0, position1, slotColor);
+						ImGui::GetWindowDrawList()->AddRectFilled(position0, position1, color);
 					}
 					else
 					{
-						ImGui::GetWindowDrawList()->AddRect(position0, position1, slotColor);
+						ImGui::GetWindowDrawList()->AddRect(position0, position1, color);
 					}
 				}
 				else
 				{
 					auto radius = SlotHeight / 4.0f;
 					auto position = slotPosition + ImVec2(radius, radius);
+					auto color = GetImU32(slotColor);
 					if(slot.IsConnected())
 					{
-						ImGui::GetWindowDrawList()->AddCircleFilled(position, radius, slotColor);
+						ImGui::GetWindowDrawList()->AddCircleFilled(position, radius, color);
 					}
 					else
 					{
-						ImGui::GetWindowDrawList()->AddCircle(position, radius, slotColor);
+						ImGui::GetWindowDrawList()->AddCircle(position, radius, color);
 					}
 				}
 				
+				// Draw variable name
+				Vector2 slotNamePosition;
+				{
+					ImVec2 cursorPosition = slotPosition - ImGui::GetWindowPos();
+					ImVec2 cursorOffset = ImVec2(SlotHeight*0.75f, -SlotHeight*0.05f);
+					if(slotSide == SlotSide::Front)
+					{
+						cursorOffset.x *= -0.25f;
+					}
+					slotNamePosition = GetLogicalVector2(cursorPosition + cursorOffset);
+				}
+
+				SetCursorPosition(slotNamePosition);
+				{
+					auto& variableName = slot.GetVariable().GetName();
+					size_t letterCount = variableName.size();
+					float textWidth = GetLogicalVector2(ImGui::CalcTextSize(variableName.c_str())).GetX();
+					float widthDifference = 0.0f;
+					if(slotSide == SlotSide::Back)
+					{
+						widthDifference = textWidth - (0.25f - slotNamePosition.GetX());
+					}
+					else
+					{
+						widthDifference = (0.5f + textWidth) - slotNamePosition.GetX();
+						if(widthDifference > 0.0f)
+						{
+							SetCursorPosition({0.5f, slotNamePosition.GetY()});
+						}
+						else
+						{
+							SetCursorPosition({slotNamePosition.GetX() - textWidth, slotNamePosition.GetY()});
+						}
+					}
+
+					std::string format = "%.*s";
+					if(widthDifference > 0.0f)
+					{
+						letterCount = static_cast<size_t>(letterCount * (1.0f - (widthDifference / textWidth)));
+
+						letterCount -= 2;
+						format += "..";
+					}
+
+					ImGui::TextColored(GetImVec4(slotColor), format.c_str(), letterCount, variableName.c_str());
+				}
+
+				// Draw input field
+				if(slotSide == SlotSide::Back && 
+				   slotVariableType != Utility::Core::VariableType::None &&
+				   slot.IsConnected() == false)
+				{
+					DrawSameLine(0.01f);
+
+					float fieldWidth = 0.5f - GetCursorPosition().GetX();
+					ImGui::PushItemWidth(GetRealImVec({fieldWidth, 0}).x);
+					if(slotVariableType == Utility::Core::VariableType::String)
+					{
+						constexpr size_t ValueSize = 256u;
+						std::string value = slot.GetVariable().GetValueString();
+						value.resize(ValueSize);
+
+						ImGui::InputText("", &value[0], ValueSize);
+
+						slot.GetVariable().SetValueString(value);
+					}
+					else if(slotVariableType == Utility::Core::VariableType::Float64)
+					{
+						auto value = slot.GetVariable().GetValueFloat64();
+						ImGui::InputDouble("", &value);
+						slot.GetVariable().SetValueFloat64(value);
+					}
+					ImGui::PopItemWidth();
+				}
+
 				ImGui::PopID();
 			}
 		};

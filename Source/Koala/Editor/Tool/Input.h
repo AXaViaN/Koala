@@ -1,6 +1,7 @@
 #ifndef KOALA__EDITOR__TOOL__INPUT
 #define KOALA__EDITOR__TOOL__INPUT
 
+#include <Koala/Editor/Gfx/Vector2.h>
 #include <Koala/Editor/Service/MessageMember.h>
 #include <Koala/Editor/Tool/Window.h>
 #include <Koala/Utility/Macro.h>
@@ -14,7 +15,12 @@ class Input final : private Service::MessageMember
 public:
 	static void Update();
 
-	static void RegisterKeyInput(const Window& window, Service::InputMessageType message, KeyType key);
+	static const Gfx::Vector2& GetMousePosition();
+
+	static void RegisterKey(const Window& window, Service::InputMessageType message, KeyType key);
+	static void RegisterMousePosition(const Window& window, Gfx::Vector2 position);
+	static void RegisterMouseButton(const Window& window, Service::InputMessageType message, MouseButtonType button);
+	static void RegisterMouseScroll(const Window& window, Gfx::Vector2 scroll);
 
 	virtual void OnMessage(Service::MessageType type, void* data) override
 	{ }
@@ -186,6 +192,15 @@ private:
 #define ASSIGNMENT_LeftShift 340
 
 DECLARE_ENUM(KeyType, KEY_TYPES)
+
+#define MOUSE_BUTTON_TYPES(value, assignment) \
+	assignment(Unknown) \
+	\
+	value(Left) \
+	value(Right) \
+	value(Middle)
+
+DECLARE_ENUM(MouseButtonType, MOUSE_BUTTON_TYPES)
 
 } // namespace Koala::Editor::Tool
 

@@ -13,6 +13,13 @@ namespace Koala::Editor::Tool {
 static GLFWwindow* GetSharedContext();
 // Input handling
 static void GlfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+static void GlfwMousePositionCallback(GLFWwindow* window, double x, double y);
+static void GlfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+static void GlfwMouseScrollCallback(GLFWwindow* window, double x, double y);
+// Helpers
+static bool IsGlfwWindowRegistered(GLFWwindow* window);
+static void LogUnknownGlfwAction(Service::LogMessageData data, int action);
+
 // Collection to keep track of actual Window instances inside the GlfwKeyCallback
 static std::map<GLFWwindow*, Window*> g_GlfwMap;
 
@@ -63,6 +70,9 @@ void Window::Create(const std::string& title, size_t width, size_t height)
 	// and then override with own callback
 	ImGui_ImplGlfwGL3_Init(static_cast<GLFWwindow*>(m_Handle), true);
 	glfwSetKeyCallback(static_cast<GLFWwindow*>(m_Handle), GlfwKeyCallback);
+	glfwSetCursorPosCallback(static_cast<GLFWwindow*>(m_Handle), GlfwMousePositionCallback);
+	glfwSetMouseButtonCallback(static_cast<GLFWwindow*>(m_Handle), GlfwMouseButtonCallback);
+	glfwSetScrollCallback(static_cast<GLFWwindow*>(m_Handle), GlfwMouseScrollCallback);
 }
 void Window::Destroy()
 {
@@ -188,22 +198,13 @@ static GLFWwindow* GetSharedContext()
 
 static void GlfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	// Keyboard callback chain
+	// Input callback chain
 	ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
-
-	if(g_GlfwMap.find(window) == g_GlfwMap.end())
+	
+	// If ImGui uses the input, we will ignore
+	if(IsGlfwWindowRegistered(window) == false ||
+	   ImGui::GetIO().WantCaptureKeyboard)
 	{
-		auto data = GenerateLogMessageData();
-		char msg[128];
-		std::sprintf(msg, "Unregistered window: %p", window);
-		data.Message = msg;
-		Service::MessageSender::Send(Service::MessageType::LogError, &data);
-
-		return;
-	}
-	else if(ImGui::GetIO().WantCaptureKeyboard)
-	{
-		// If ImGui uses the keyboard input, we will ignore
 		return;
 	}
 
@@ -223,15 +224,104 @@ static void GlfwKeyCallback(GLFWwindow* window, int key, int scancode, int actio
 	else
 	{
 		auto data = GenerateLogMessageData();
-		data.Message = "Unknown glfw action: " + std::to_string(action);
-		Service::MessageSender::Send(Service::MessageType::LogError, &data);
+		LogUnknownGlfwAction(data, action);
 
 		return;
 	}
 
 	KeyType keyType = static_cast<KeyType>(key);
 	
-	Input::RegisterKeyInput(*g_GlfwMap[window], message, keyType);
+	Input::RegisterKey(*g_GlfwMap[window], message, keyType);
+}
+static void GlfwMousePositionCallback(GLFWwindow* window, double x, double y)
+{
+	if(IsGlfwWindowRegistered(window) == false)
+	{
+		return;
+	}
+
+	// Convert to the logical space
+	auto& windowObject = *g_GlfwMap[window];
+	x /= windowObject.GetWidth();
+	y /= windowObject.GetHeight();
+	
+	Input::RegisterMousePosition(windowObject, Gfx::Vector2(static_cast<float>(x), static_cast<float>(y)));
+}
+static void GlfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+	// Input callback chain
+	ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+	
+	if(IsGlfwWindowRegistered(window) == false)
+	{
+		return;
+	}
+
+	Service::InputMessageType message;
+	if(action == GLFW_PRESS)
+	{
+		message = Service::InputMessageType::MousePress;
+	}
+	else if(action == GLFW_RELEASE)
+	{
+		message = Service::InputMessageType::MouseRelease;
+	}
+	else
+	{
+		auto data = GenerateLogMessageData();
+		LogUnknownGlfwAction(data, action);
+
+		return;
+	}
+	
+	MouseButtonType buttonType = MouseButtonType::Unknown;
+	if(button == GLFW_MOUSE_BUTTON_LEFT)
+	{
+		buttonType = MouseButtonType::Left;
+	}
+	else if(button == GLFW_MOUSE_BUTTON_RIGHT)
+	{
+		buttonType = MouseButtonType::Right;
+	}
+	else if(button == GLFW_MOUSE_BUTTON_MIDDLE)
+	{
+		buttonType = MouseButtonType::Middle;
+	}
+
+	Input::RegisterMouseButton(*g_GlfwMap[window], message, buttonType);
+}
+static void GlfwMouseScrollCallback(GLFWwindow* window, double x, double y)
+{
+	// Input callback chain
+	ImGui_ImplGlfw_ScrollCallback(window, x, y);
+
+	if(IsGlfwWindowRegistered(window) == false)
+	{
+		return;
+	}
+
+	Input::RegisterMouseScroll(*g_GlfwMap[window], Gfx::Vector2(static_cast<float>(x), static_cast<float>(y)));
+}
+
+static bool IsGlfwWindowRegistered(GLFWwindow* window)
+{
+	if(g_GlfwMap.find(window) == g_GlfwMap.end())
+	{
+		auto data = GenerateLogMessageData();
+		char msg[128];
+		std::sprintf(msg, "Unregistered window: %p", window);
+		data.Message = msg;
+		Service::MessageSender::Send(Service::MessageType::LogError, &data);
+
+		return false;
+	}
+
+	return true;
+}
+static void LogUnknownGlfwAction(Service::LogMessageData data, int action)
+{
+	data.Message = "Unknown glfw action: " + std::to_string(action);
+	Service::MessageSender::Send(Service::MessageType::LogError, &data);
 }
 
 } // namespace Koala::Editor::Tool

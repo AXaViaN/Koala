@@ -17,8 +17,13 @@ void Console::OnMessage(Service::MessageType type, void* data)
 void Console::OnInput(Service::InputMessageType type, const Service::InputMessageData& data)
 {
 #ifdef KOALA_DEBUG
-	std::printf("Input: %s, %s, %s\n", data.Window.GetTitle().c_str(), 
-				KeyTypeToString(data.Key).c_str(), Service::InputMessageTypeToString(type).c_str());
+	std::printf("Input: %s, %s    \t->\tKey=%s, Button=%s, Scroll=(%f, %f)\n", 
+				data.Window.GetTitle().c_str(), 
+				Service::InputMessageTypeToString(type).c_str(), 
+				KeyTypeToString(data.Key).c_str(), 
+				MouseButtonTypeToString(data.Button).c_str(), 
+				data.Scroll.GetX(), 
+				data.Scroll.GetY());
 #endif
 }
 

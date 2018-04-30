@@ -19,6 +19,7 @@ private:
 
 private:
 	virtual void OnGui() override;
+	virtual void OnMessage(Service::MessageType type, void* data) override;
 	virtual void OnInput(Service::InputMessageType type, const Service::InputMessageData& data) override;
 
 private:
@@ -38,6 +39,7 @@ struct CodeBoard::Function
 {
 	std::string Name;
 	std::vector<SceneNode> SceneNodes;
+	size_t CoreNodeCount = 1;
 
 	Gfx::Vector2 DragOffset;
 };

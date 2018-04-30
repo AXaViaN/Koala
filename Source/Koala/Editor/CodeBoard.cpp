@@ -42,6 +42,17 @@ CodeBoard::CodeBoard(const Tool::Window& window) :
 	m_FunctionList.emplace_back();
 	m_FunctionList.back().Name = "Test";
 	m_FunctionList.back().SceneNodes.emplace_back();
+	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.7f, 0.3f);
+	{
+		Utility::Core::FunctionInfo functionInfo;
+		functionInfo.Name = "Test";
+		functionInfo.FrontSlots.emplace_back("", Utility::Core::VariableType::None);
+		functionInfo.FrontSlots.emplace_back("Deger", Utility::Core::VariableType::Float64);
+
+		size_t programFunctionID = Utility::Core::FunctionManager::Add(functionInfo);
+		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionID);
+	}
+	m_FunctionList.back().SceneNodes.emplace_back();
 	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.2f, 0.7f);
 	{
 		Utility::Core::FunctionInfo functionInfo;
@@ -79,6 +90,49 @@ void CodeBoard::OnGui()
 	for( auto& sceneNode : m_FunctionList[m_SelectedFunction].SceneNodes )
 	{
 		Renderer::DrawNode(sceneNode.Node, sceneNode.Position + m_FunctionList[m_SelectedFunction].DragOffset);
+	}
+}
+void CodeBoard::OnMessage(Service::MessageType type, void* data)
+{
+	// Node movement and removal commands comes from Renderer::DrawNode
+
+	switch(type)
+	{
+		case Koala::Editor::Service::MessageType::NodeMove:
+		{
+			auto moveData = static_cast<Service::NodeMoveData*>(data);
+			for( auto& sceneNode : m_FunctionList[m_SelectedFunction].SceneNodes )
+			{
+				if(&sceneNode.Node == &moveData->Node)
+				{
+					sceneNode.Position +=  {moveData->RawMouseDelta.GetX() / m_Window.GetWidth(), 
+											moveData->RawMouseDelta.GetY() / m_Window.GetHeight()};
+				}
+			}
+
+			break;
+		}
+		case Koala::Editor::Service::MessageType::NodeRemove:
+		{
+			auto removeData = static_cast<Service::NodeRemoveData*>(data);
+			auto& sceneNodes = m_FunctionList[m_SelectedFunction].SceneNodes;
+			size_t removeIndex = 0;
+			for( size_t i=0 ; i<sceneNodes.size() ; ++i )
+			{
+				if(&sceneNodes[i].Node == &removeData->Node)
+				{
+					removeIndex = i;
+					break;
+				}
+			}
+
+			if(removeIndex >= m_FunctionList[m_SelectedFunction].CoreNodeCount)
+			{
+				sceneNodes.erase(sceneNodes.begin() + removeIndex);
+			}
+
+			break;
+		}
 	}
 }
 void CodeBoard::OnInput(Service::InputMessageType type, const Service::InputMessageData& data)

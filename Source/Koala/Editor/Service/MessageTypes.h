@@ -13,6 +13,9 @@ enum class MouseButtonType;
 namespace Koala::Utility {
 enum class LogType;
 }
+namespace Koala::Utility::Core {
+class Node;
+}
 
 namespace Koala::Editor::Service {
 
@@ -42,7 +45,10 @@ struct InputMessageData
 #define MESSAGE_TYPES(value, assignment) \
 	value(ProgramExit) \
 	value(LogInfo) \
-	value(LogError)
+	value(LogError) \
+	\
+	value(NodeMove) \
+	value(NodeRemove)
 
 DECLARE_ENUM(MessageType, MESSAGE_TYPES)
 
@@ -54,6 +60,16 @@ struct LogMessageData
 };
 #define GenerateLogMessageData() \
 	Koala::Editor::Service::LogMessageData {"", __FUNCTION__, size_t(__LINE__)}
+
+struct NodeMoveData
+{
+	const Utility::Core::Node& Node;
+	const Gfx::Vector2 RawMouseDelta;
+};
+struct NodeRemoveData
+{
+	const Utility::Core::Node& Node;
+};
 
 } // namespace Koala::Editor::Service
 

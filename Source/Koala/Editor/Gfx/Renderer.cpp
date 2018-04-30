@@ -1,4 +1,5 @@
 #include <Koala/Editor/Gfx/Renderer.h>
+#include <Koala/Editor/Service/MessageSender.h>
 #include <GL/glew.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw_gl3.h>
@@ -23,6 +24,10 @@ static ImVec2 GetRealImVec(const Vector2& vec)
 {
 	return {ImGui::GetWindowSize().x * vec.GetX(), 
 			ImGui::GetWindowSize().y * vec.GetY()};
+}
+static Vector2 GetVector2(const ImVec2& vec)
+{
+	return {vec.x, vec.y};
 }
 static Vector2 GetLogicalVector2(const ImVec2& vec)
 {
@@ -389,6 +394,38 @@ void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 
 		drawSlots(node.GetFrontSlots(), SlotSide::Front);
 		drawSlots(node.GetBackSlots(), SlotSide::Back);
+
+		// Handle input for the node and send commands
+		static Utility::Core::Node* draggingNode = nullptr;
+		static constexpr int ImGuiLeftMouse = 0;
+		static constexpr int ImGuiRightMouse = 1;
+		if(ImGui::IsWindowHovered())
+		{
+			if(ImGui::IsMouseDragging(ImGuiLeftMouse))
+			{
+				draggingNode = &node;
+			}
+			else if(ImGui::IsMouseClicked(ImGuiRightMouse))
+			{
+				Service::NodeRemoveData data = {node};
+				Service::MessageSender::Send(Service::MessageType::NodeRemove, &data);
+			}
+		}
+		if(&node == draggingNode)
+		{
+			if(ImGui::IsMouseReleased(ImGuiLeftMouse))
+			{
+				draggingNode = nullptr;
+			}
+			else
+			{
+				auto mouseDrag = ImGui::GetIO().MouseDelta;
+
+				Service::NodeMoveData data = {node, GetVector2(mouseDrag)};
+				Service::MessageSender::Send(Service::MessageType::NodeMove, &data);
+			}
+		}
+
 	}
 	ImGui::EndChild();
 	ImGui::PopStyleColor();

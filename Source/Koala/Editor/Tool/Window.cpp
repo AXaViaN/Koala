@@ -235,7 +235,9 @@ static void GlfwKeyCallback(GLFWwindow* window, int key, int scancode, int actio
 }
 static void GlfwMousePositionCallback(GLFWwindow* window, double x, double y)
 {
-	if(IsGlfwWindowRegistered(window) == false)
+	// If ImGui uses the input, we will ignore
+	if(IsGlfwWindowRegistered(window) == false ||
+	   ImGui::GetIO().WantCaptureMouse)
 	{
 		return;
 	}
@@ -251,8 +253,10 @@ static void GlfwMouseButtonCallback(GLFWwindow* window, int button, int action, 
 {
 	// Input callback chain
 	ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-	
-	if(IsGlfwWindowRegistered(window) == false)
+
+	// If ImGui uses the input, we will ignore
+	if(IsGlfwWindowRegistered(window) == false ||
+	   ImGui::GetIO().WantCaptureMouse)
 	{
 		return;
 	}
@@ -295,7 +299,9 @@ static void GlfwMouseScrollCallback(GLFWwindow* window, double x, double y)
 	// Input callback chain
 	ImGui_ImplGlfw_ScrollCallback(window, x, y);
 
-	if(IsGlfwWindowRegistered(window) == false)
+	// If ImGui uses the input, we will ignore
+	if(IsGlfwWindowRegistered(window) == false ||
+	   ImGui::GetIO().WantCaptureMouse)
 	{
 		return;
 	}

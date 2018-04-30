@@ -1,19 +1,61 @@
 #include <Koala/Editor/CodeBoard.h>
+#include <Koala/Editor/Private/CodeBoardButtonPanel.h>
 #include <Koala/Editor/Gfx/Renderer.h>
+#include <Koala/Editor/Tool/Input.h>
 
 namespace Koala::Editor {
 
 static void SetupDefaultFunctions(Utility::Core::Node& programNode);
 
 CodeBoard::CodeBoard(const Tool::Window& window) :
-	Gfx::Panel(window, CodeBoardStartPosition(), CodeBoardEndPosition())
-{
-	m_FunctionList.emplace_back();
-	m_FunctionList.back().first = Utility::Resource::GetText(Utility::Text::Program);
-	m_FunctionList.back().second.emplace_back();
-	m_FunctionList.back().second.back().Position = Gfx::Vector2(0.05f, 0.1f);
+	Gfx::Panel(window, 
+			   Gfx::Vector2(CodeBoardStartPosition().GetX(), 
+							CodeBoardStartPosition().GetY()+CodeBoardButtonPanel::ButtonHeight), 
+			   CodeBoardEndPosition()),
 
-	SetupDefaultFunctions(m_FunctionList.back().second.back().Node);
+	m_Window(window)
+{
+	Panel::DisableScrollBar();
+	Panel::DisablePanelInput();
+
+	m_FunctionList.emplace_back();
+	m_FunctionList.back().Name = Utility::Resource::GetText(Utility::Text::Program);
+	m_FunctionList.back().SceneNodes.emplace_back();
+	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.05f, 0.1f);
+
+#if 1
+	m_FunctionList.back().SceneNodes.emplace_back();
+	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.5f, 0.5f);
+	{
+		Utility::Core::FunctionInfo functionInfo;
+		functionInfo.Name = "Topla";
+		functionInfo.BackSlots.emplace_back("", Utility::Core::VariableType::None);
+		functionInfo.BackSlots.emplace_back("X", Utility::Core::VariableType::Float64);
+		functionInfo.BackSlots.emplace_back("Y", Utility::Core::VariableType::Float64);
+		functionInfo.FrontSlots.emplace_back("", Utility::Core::VariableType::None);
+		functionInfo.FrontSlots.emplace_back("Sonuc", Utility::Core::VariableType::Float64);
+
+		size_t programFunctionID = Utility::Core::FunctionManager::Add(functionInfo);
+		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionID);
+	}
+
+	m_FunctionList.emplace_back();
+	m_FunctionList.back().Name = "Test";
+	m_FunctionList.back().SceneNodes.emplace_back();
+	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.2f, 0.7f);
+	{
+		Utility::Core::FunctionInfo functionInfo;
+		functionInfo.Name = "Yazdir";
+		functionInfo.BackSlots.emplace_back("", Utility::Core::VariableType::None);
+		functionInfo.BackSlots.emplace_back("", Utility::Core::VariableType::String);
+		functionInfo.FrontSlots.emplace_back("", Utility::Core::VariableType::None);
+
+		size_t programFunctionID = Utility::Core::FunctionManager::Add(functionInfo);
+		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionID);
+	}
+#endif
+
+	SetupDefaultFunctions(m_FunctionList[0].SceneNodes[0].Node);
 
 	m_SelectedFunction = 0;
 }
@@ -23,25 +65,47 @@ void CodeBoard::OnGui()
 	using namespace Gfx;
 
 	// Draw buttons
-	const size_t FunctionCount = m_FunctionList.size();
-	const float ButtonSpacing = 0.001f;
-	const float ButtonWidth = 1.0f/FunctionCount - ButtonSpacing;
-	Vector2 cursorPosition;
-	for( size_t i=0 ; i<FunctionCount ; ++i )
 	{
-		if(Renderer::DrawButton(m_FunctionList[i].first, {ButtonWidth, 0.04f}, m_SelectedFunction==i))
+		std::vector<std::string> functionNames;
+		for( size_t i=0 ; i<m_FunctionList.size() ; ++i )
 		{
-			m_SelectedFunction = i;
+			functionNames.emplace_back(m_FunctionList[i].Name);
 		}
-		cursorPosition = Renderer::GetCursorPosition();
-		Renderer::DrawSameLine(ButtonSpacing);
+
+		CodeBoardButtonPanel::Instance(m_Window).Update(functionNames, m_SelectedFunction);
 	}
 
 	// Draw Nodes
-	Renderer::SetCursorPosition(cursorPosition);
-	for( auto& sceneNode : m_FunctionList[m_SelectedFunction].second )
+	for( auto& sceneNode : m_FunctionList[m_SelectedFunction].SceneNodes )
 	{
-		Renderer::DrawNode(sceneNode.Node, sceneNode.Position);
+		Renderer::DrawNode(sceneNode.Node, sceneNode.Position + m_FunctionList[m_SelectedFunction].DragOffset);
+	}
+}
+void CodeBoard::OnInput(Service::InputMessageType type, const Service::InputMessageData& data)
+{
+	static Gfx::Vector2 oldMousePosition;
+
+	switch(type)
+	{
+		case Koala::Editor::Service::InputMessageType::MousePress:
+		{
+			if(data.Button == Tool::MouseButtonType::Left)
+			{
+				oldMousePosition = Tool::Input::GetMousePosition();
+			}
+			break;
+		}
+		case Koala::Editor::Service::InputMessageType::MouseHold:
+		{
+			if(data.Button == Tool::MouseButtonType::Left)
+			{
+				auto mouseDelta = Tool::Input::GetMousePosition() - oldMousePosition;
+				oldMousePosition = Tool::Input::GetMousePosition();
+
+				m_FunctionList[m_SelectedFunction].DragOffset += mouseDelta;
+			}
+			break;
+		}
 	}
 }
 
@@ -51,19 +115,7 @@ static void SetupDefaultFunctions(Utility::Core::Node& programNode)
 	{
 		Utility::Core::FunctionInfo functionInfo;
 		functionInfo.NameText = Utility::Text::Program;
-		functionInfo.FrontSlots.emplace_back("1", Utility::Core::VariableType::None);
-		functionInfo.FrontSlots.emplace_back("2", Utility::Core::VariableType::Float64);
-		functionInfo.BackSlots.emplace_back("3", Utility::Core::VariableType::String);
-		functionInfo.FrontSlots.emplace_back("4", Utility::Core::VariableType::None);
-		functionInfo.BackSlots.emplace_back("5", Utility::Core::VariableType::None);
-		functionInfo.FrontSlots.emplace_back("example", Utility::Core::VariableType::String);
-		functionInfo.FrontSlots.emplace_back("very long variable name", Utility::Core::VariableType::Float64);
-		functionInfo.BackSlots.emplace_back("8", Utility::Core::VariableType::String);
-		functionInfo.FrontSlots.emplace_back("9", Utility::Core::VariableType::None);
-		functionInfo.FrontSlots.emplace_back("10", Utility::Core::VariableType::None);
-		functionInfo.BackSlots.emplace_back("11", Utility::Core::VariableType::Float64);
-		functionInfo.FrontSlots.emplace_back("12", Utility::Core::VariableType::Float64);
-		functionInfo.BackSlots.emplace_back("long name", Utility::Core::VariableType::Float64);
+		functionInfo.FrontSlots.emplace_back("", Utility::Core::VariableType::None);
 
 		size_t programFunctionID = Utility::Core::FunctionManager::Add(functionInfo);
 		programNode = Utility::Core::Node(programFunctionID);

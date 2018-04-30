@@ -15,12 +15,16 @@ public:
 
 private:
 	struct SceneNode;
+	struct Function;
 
 private:
 	virtual void OnGui() override;
+	virtual void OnInput(Service::InputMessageType type, const Service::InputMessageData& data) override;
 
 private:
-	std::vector<std::pair<std::string, std::vector<SceneNode>>> m_FunctionList;
+	const Tool::Window& m_Window;
+
+	std::vector<Function> m_FunctionList;
 	size_t m_SelectedFunction;
 
 };
@@ -29,6 +33,13 @@ struct CodeBoard::SceneNode
 {
 	Utility::Core::Node Node = Utility::Core::Node(0);
 	Gfx::Vector2 Position;
+};
+struct CodeBoard::Function
+{
+	std::string Name;
+	std::vector<SceneNode> SceneNodes;
+
+	Gfx::Vector2 DragOffset;
 };
 
 } // namespace Koala::Editor

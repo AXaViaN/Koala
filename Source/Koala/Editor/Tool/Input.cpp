@@ -1,6 +1,5 @@
 #include <Koala/Editor/Tool/Input.h>
 #include <GLFW/glfw3.h>
-#include <ctime>
 
 namespace Koala::Editor::Tool {
 
@@ -9,7 +8,6 @@ static Gfx::Vector2 g_MousePosition;
 static bool g_IsHoldingMouseButton = false;
 static MouseButtonType g_HoldingMouseButton;
 static const Tool::Window* g_HoldingMouseButtonWindow;
-static std::clock_t g_HoldingMouseButtonTimer;
 
 void Input::Update()
 {
@@ -17,16 +15,9 @@ void Input::Update()
 
 	if(g_IsHoldingMouseButton)
 	{
-		// Mimic glfw key holding delay
-		float duration = (std::clock() - g_HoldingMouseButtonTimer) / static_cast<float>(CLOCKS_PER_SEC);
-		if(duration > 0.5f)
-		{
-			g_HoldingMouseButtonTimer = std::clock() - static_cast<std::clock_t>(0.475f * CLOCKS_PER_SEC);
-
-			static Input instance;
-			instance.SendInput(Service::InputMessageType::MouseHold, 
-							   {*g_HoldingMouseButtonWindow, KeyType::Unknown, g_HoldingMouseButton});
-		}
+		static Input instance;
+		instance.SendInput(Service::InputMessageType::MouseHold, 
+						   {*g_HoldingMouseButtonWindow, KeyType::Unknown, g_HoldingMouseButton});
 	}
 }
 
@@ -60,7 +51,6 @@ void Input::RegisterMouseButton(const Window& window, Service::InputMessageType 
 		g_IsHoldingMouseButton = true;
 		g_HoldingMouseButton = button;
 		g_HoldingMouseButtonWindow = &window;
-		g_HoldingMouseButtonTimer = std::clock();
 	}
 	else if(message == Service::InputMessageType::MouseRelease)
 	{

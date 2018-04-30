@@ -182,6 +182,7 @@
     <ClInclude Include="Source\Koala\Editor\Gfx\Vector2.h" />
     <ClInclude Include="Source\Koala\Editor\Main.h" />
     <ClInclude Include="Source\Koala\Editor\Palette.h" />
+    <ClInclude Include="Source\Koala\Editor\Private\CodeBoardButtonPanel.h" />
     <ClInclude Include="Source\Koala\Editor\Service\MessageMember.h" />
     <ClInclude Include="Source\Koala\Editor\Service\MessageSender.h" />
     <ClInclude Include="Source\Koala\Editor\Service\Private\MessageManager.h" />

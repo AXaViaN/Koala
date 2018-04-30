@@ -125,5 +125,8 @@
     <ClInclude Include="Source\Koala\Editor\Palette.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Koala\Editor\Private\CodeBoardButtonPanel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -30,6 +30,11 @@ protected:
 	{ }
 
 	void DisableScrollBar();
+	void DisablePanelInput();
+
+	void BeginSubPanel(bool enableInputs=true);
+	void BeginSubPanel(Vector2 startPosition, Vector2 endPosition, bool enableInputs=true);
+	void EndSubPanel();
 
 	static const Gfx::Vector2& CodeBoardStartPosition()
 	{

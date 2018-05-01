@@ -39,6 +39,7 @@ public:
 	static void EndTree();
 
 	static void DrawNode(Utility::Core::Node& node, const Vector2& position);
+	static void DrawFrontConnections(const Utility::Core::Node& node, const Vector2& position);
 
 };
 

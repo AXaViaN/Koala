@@ -8,6 +8,9 @@
 namespace Koala::Editor::Gfx {
 
 static const Color ErrorColor = Color(1.0f, 0.0f, 1.0f);
+static const Vector2 NodeBaseSize = Vector2(0.3f, 0.075f);
+static constexpr float NodeItemHeight = 0.04f;
+static constexpr float LineThickness = 2.0f;
 static ImVec2 GetImVec2(const Vector2& vec)
 {
 	return {vec.GetX(), vec.GetY()};
@@ -53,6 +56,58 @@ static ImVec2& operator-=(ImVec2& first, const ImVec2& second)
 {
 	first = first - second;
 	return first;
+}
+
+// Node rendering helpers
+static Vector2 g_LastSlotStartPosition;
+static ImVec2 g_LastSlotWindowSize;
+enum class SlotSide
+{
+	Front,
+	Back
+};
+static ImVec2 GetSlotPosition(const ImVec2& windowPosition, float slotHeight, SlotSide slotSide, size_t index)
+{
+	ImVec2 slotPosition = windowPosition;
+	if(slotSide == SlotSide::Back)
+	{
+		slotPosition += {g_LastSlotWindowSize.x * g_LastSlotStartPosition.GetX(), 
+						 g_LastSlotWindowSize.y * g_LastSlotStartPosition.GetY()};
+	}
+	else
+	{
+		Vector2 slotStartPosition = {1.0f - g_LastSlotStartPosition.GetX(), g_LastSlotStartPosition.GetY()};
+		slotPosition += {g_LastSlotWindowSize.x * slotStartPosition.GetX(), 
+						 g_LastSlotWindowSize.y * slotStartPosition.GetY()};
+		slotPosition.x -= slotHeight / 2.0f;
+	}
+	slotPosition.y += index * slotHeight;
+
+	return slotPosition;
+};
+static Color GetSlotColor(Utility::Core::VariableType slotVariableType, bool* isFlow=nullptr)
+{
+	if(slotVariableType == Utility::Core::VariableType::None)
+	{
+		if(isFlow != nullptr)
+		{
+			*isFlow = true;
+		}
+
+		return Color(1.0f, 1.0f, 1.0f);
+	}
+	else if(slotVariableType == Utility::Core::VariableType::Float64)
+	{
+		return Color(0.5f, 0.7f, 1.0f);
+	}
+	else if(slotVariableType == Utility::Core::VariableType::String)
+	{
+		return Color(0.5f, 1.0f, 0.7f);
+	}
+	else
+	{
+		return ErrorColor;
+	}
 }
 
 void Renderer::Initialize()
@@ -209,9 +264,6 @@ void Renderer::EndTree()
 
 void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 {
-	static const Vector2 NodeBaseSize = Vector2(0.3f, 0.075f);
-	static const float NodeItemHeight = 0.04f;
-
 	const float SlotHeight = ImGui::GetWindowSize().y * NodeItemHeight;
 
 	ImVec2 nodeSize = GetRealImVec(NodeBaseSize);
@@ -232,14 +284,10 @@ void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 		DrawSeperator();
 		Spacing(4);
 
-		const Vector2 SlotStartPosition = GetCursorPosition();
+		g_LastSlotStartPosition = GetCursorPosition();
+		g_LastSlotWindowSize = ImGui::GetWindowSize();
 
-		enum class SlotSide
-		{
-			Front,
-			Back
-		};
-		auto drawSlots = [&SlotStartPosition, &SlotHeight](std::vector<Utility::Core::Slot>& slots, SlotSide slotSide)
+		auto drawSlots = [&SlotHeight](std::vector<Utility::Core::Slot>& slots, SlotSide slotSide)
 		{
 			for( size_t i=0 ; i<slots.size() ; ++i )
 			{
@@ -248,41 +296,10 @@ void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 				ImGui::PushID(&slot);
 
 				bool isFlow = false;
-				Color slotColor;
-				ImVec2 slotPosition = ImGui::GetWindowPos();
-				if(slotSide == SlotSide::Back)
-				{
-					slotPosition += GetRealImVec(SlotStartPosition);
-				}
-				else
-				{
-					auto startPositionX = 1.0f - SlotStartPosition.GetX();
-					slotPosition += GetRealImVec({startPositionX, SlotStartPosition.GetY()});
-					slotPosition.x -= SlotHeight / 2.0f;
-				}
-				slotPosition.y += i * SlotHeight;
-
-				// Select color based on the variable type
 				auto& slotVariableType = slot.GetVariable().GetVariableType();
-				if(slotVariableType == Utility::Core::VariableType::None)
-				{
-					// It is a flow
-					slotColor = Color(1.0f, 1.0f, 1.0f);
-					isFlow = true;
-				}
-				else if(slotVariableType == Utility::Core::VariableType::Float64)
-				{
-					slotColor = Color(0.5f, 0.7f, 1.0f);
-				}
-				else if(slotVariableType == Utility::Core::VariableType::String)
-				{
-					slotColor = Color(0.5f, 1.0f, 0.7f);
-				}
-				else
-				{
-					slotColor = ErrorColor;
-				}
-				
+				Color slotColor = GetSlotColor(slotVariableType, &isFlow);
+				ImVec2 slotPosition = GetSlotPosition(ImGui::GetWindowPos(), SlotHeight, slotSide, i);
+
 				// Draw slot port
 				if(isFlow)
 				{
@@ -429,6 +446,48 @@ void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 	}
 	ImGui::EndChild();
 	ImGui::PopStyleColor();
+	ImGui::PopID();
+}
+void Renderer::DrawFrontConnections(const Utility::Core::Node& node, const Vector2& position)
+{
+	const float SlotHeight = ImGui::GetWindowSize().y * NodeItemHeight;
+	const ImVec2 PanelPositionRaw = ImGui::GetWindowPos();
+
+	ImVec2 nodePosition = PanelPositionRaw + GetRealImVec(position);
+	
+	ImGui::PushID(&node);
+	for( size_t i=0 ; i<node.GetFrontSlots().size() ; ++i )
+	{
+		auto& slot = node.GetFrontSlots()[i];
+		ImGui::PushID(&slot);
+
+		if(slot.IsConnected())
+		{
+			// Select color based on the variable type
+			Color slotColor = GetSlotColor(slot.GetVariable().GetVariableType());
+			
+			// Get connection and other node
+			auto connection = slot.GetConnection();
+
+			Service::RequestNodeData other = {connection.NodeID};
+			Service::MessageSender::Send(Service::MessageType::RequestNode, &other);
+
+			// Calculate the other slots position
+			ImVec2 otherNodePosition = PanelPositionRaw + GetRealImVec(other.NodePosition);
+			
+			// Draw
+			auto radius = SlotHeight / 4.0f;
+			auto position0 = GetSlotPosition(nodePosition, SlotHeight, SlotSide::Front, i) + ImVec2(radius, radius);
+			auto position1 = GetSlotPosition(otherNodePosition, SlotHeight, SlotSide::Back, connection.SlotIndex) + ImVec2(radius, radius);
+			auto color = GetImU32(slotColor);
+			ImVec2 cp0 = ImVec2(position1.x, position0.y);
+			ImVec2 cp1 = ImVec2(position0.x, position1.y);
+			ImGui::GetWindowDrawList()->AddBezierCurve(position0, cp0, cp1, position1, 
+													   color, LineThickness);
+		}
+
+		ImGui::PopID();
+	}
 	ImGui::PopID();
 }
 

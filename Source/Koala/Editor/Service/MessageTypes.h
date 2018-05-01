@@ -15,6 +15,7 @@ enum class LogType;
 }
 namespace Koala::Utility::Core {
 class Node;
+using NodeID = size_t;
 }
 
 namespace Koala::Editor::Service {
@@ -48,7 +49,9 @@ struct InputMessageData
 	value(LogError) \
 	\
 	value(NodeMove) \
-	value(NodeRemove)
+	value(NodeRemove) \
+	\
+	value(RequestNode)
 
 DECLARE_ENUM(MessageType, MESSAGE_TYPES)
 
@@ -69,6 +72,13 @@ struct NodeMoveData
 struct NodeRemoveData
 {
 	const Utility::Core::Node& Node;
+};
+
+struct RequestNodeData
+{
+	const Utility::Core::NodeID NodeID = 0;
+	const Utility::Core::Node* Node;
+	Gfx::Vector2 NodePosition;
 };
 
 } // namespace Koala::Editor::Service

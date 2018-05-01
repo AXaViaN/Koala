@@ -21,6 +21,11 @@ public:
 	std::vector<Slot>& GetBackSlots();
 	std::vector<Slot>& GetFrontSlots();
 
+	const NodeID& GetID()
+	{
+		return m_ID;
+	}
+
 private:
 	NodeID m_ID;
 	FunctionID m_FunctionID;

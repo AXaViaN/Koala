@@ -9,6 +9,12 @@ namespace Koala::Utility::Core {
 
 using NodeID = size_t;
 
+enum class SlotSide
+{
+	Front,
+	Back
+};
+
 class Node
 {
 public:
@@ -21,7 +27,10 @@ public:
 	std::vector<Slot>& GetBackSlots();
 	std::vector<Slot>& GetFrontSlots();
 
-	const NodeID& GetID()
+	const std::vector<Slot>& GetSlots(SlotSide slotSide) const;
+	std::vector<Slot>& GetSlots(SlotSide slotSide);
+	
+	const NodeID& GetID() const
 	{
 		return m_ID;
 	}

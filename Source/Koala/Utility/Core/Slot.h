@@ -2,6 +2,7 @@
 #define KOALA__UTILITY__CORE__SLOT
 
 #include <Koala/Utility/Core/Variable.h>
+#include <vector>
 
 namespace Koala::Utility::Core {
 
@@ -23,7 +24,23 @@ public:
 
 	void Connect(const Port& port)
 	{
-		m_Connection = port;
+		m_Connections.emplace_back(port);
+	}
+	void Disconnect(const Port& port)
+	{
+		for( size_t i=0 ; i<m_Connections.size() ; ++i )
+		{
+			if(m_Connections[i].NodeID == port.NodeID &&
+			   m_Connections[i].SlotIndex == port.SlotIndex)
+			{
+				m_Connections.erase(m_Connections.begin() + i);
+				break;
+			}
+		}
+	}
+	void DisconnectAll()
+	{
+		m_Connections.clear();
 	}
 
 	Variable& GetVariable()
@@ -39,18 +56,36 @@ public:
 		return m_Port;
 	}
 
-	const Port& GetConnection() const
+	const std::vector<Port>& GetConnections() const
 	{
-		return m_Connection;
+		return m_Connections;
+	}
+	const Port& GetConnection(const Port& port) const
+	{
+		for( auto& connection : m_Connections )
+		{
+			if(connection.NodeID == port.NodeID &&
+			   connection.SlotIndex == port.SlotIndex)
+			{
+				return connection;
+			}
+		}
+
+		static Port dummy;
+		return dummy;
 	}
 	bool IsConnected() const
 	{
-		return m_Connection.NodeID != 0;
+		return m_Connections.size() != 0;
+	}
+	size_t GetConnectionCount() const
+	{
+		return m_Connections.size();
 	}
 
 private:
 	Port m_Port;
-	Port m_Connection;
+	std::vector<Port> m_Connections;
 
 	Variable m_Variable;
 

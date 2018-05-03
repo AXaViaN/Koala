@@ -19,7 +19,6 @@ CodeBoard::CodeBoard(const Tool::Window& window) :
 	Panel::DisablePanelInput();
 
 	m_FunctionList.emplace_back();
-	m_FunctionList.back().Name = Utility::Resource::GetText(Utility::Text::Program);
 	m_FunctionList.back().SceneNodes.emplace_back();
 	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.05f, 0.1f);
 
@@ -53,7 +52,6 @@ CodeBoard::CodeBoard(const Tool::Window& window) :
 	}
 
 	m_FunctionList.emplace_back();
-	m_FunctionList.back().Name = "Test";
 	m_FunctionList.back().SceneNodes.emplace_back();
 	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.7f, 0.3f);
 	{
@@ -104,7 +102,7 @@ void CodeBoard::OnGui()
 		std::vector<std::string> functionNames;
 		for( size_t i=0 ; i<m_FunctionList.size() ; ++i )
 		{
-			functionNames.emplace_back(m_FunctionList[i].Name);
+			functionNames.emplace_back(m_FunctionList[i].SceneNodes[0].Node.GetName());
 		}
 
 		CodeBoardButtonPanel::Instance(m_Window).Update(functionNames, m_SelectedFunction);
@@ -121,6 +119,21 @@ void CodeBoard::OnGui()
 	{
 		Renderer::DrawFrontConnections(sceneNode.Node, sceneNode.Position + m_FunctionList[m_SelectedFunction].DragOffset);
 	}
+
+	// Connection drawing & input
+	if(m_IsConnecting)
+	{
+		auto position = GetSceneNode(m_ConnectionData.Node->GetID()).Position;
+		position += m_FunctionList[m_SelectedFunction].DragOffset;
+
+		Renderer::DrawConnectionToMouse(*m_ConnectionData.Node, position, m_ConnectionData.SlotSide, m_ConnectionData.SlotIndex);
+	}
+
+	if(m_IsConnectingCancelled)
+	{
+		m_IsConnecting = false;
+		m_IsConnectingCancelled = false;
+	}
 }
 void CodeBoard::OnMessage(Service::MessageType type, void* data)
 {
@@ -130,20 +143,26 @@ void CodeBoard::OnMessage(Service::MessageType type, void* data)
 	{
 		case Service::MessageType::NodeMove:
 		{
-			auto moveData = static_cast<Service::NodeMoveData*>(data);
-			for( auto& sceneNode : m_FunctionList[m_SelectedFunction].SceneNodes )
+			if(m_IsConnecting)
 			{
-				if(&sceneNode.Node == &moveData->Node)
-				{
-					sceneNode.Position +=  {moveData->RawMouseDelta.GetX() / m_Window.GetWidth(), 
-											moveData->RawMouseDelta.GetY() / m_Window.GetHeight()};
-				}
+				break;
 			}
+
+			auto moveData = static_cast<Service::NodeMoveData*>(data);
+
+			auto& sceneNode = GetSceneNode(moveData->Node.GetID());
+			sceneNode.Position += {moveData->RawMouseDelta.GetX() / m_Window.GetWidth(), 
+								   moveData->RawMouseDelta.GetY() / m_Window.GetHeight()};
 
 			break;
 		}
 		case Service::MessageType::NodeRemove:
 		{
+			if(m_IsConnecting)
+			{
+				break;
+			}
+
 			auto removeData = static_cast<Service::NodeRemoveData*>(data);
 			auto& sceneNodes = m_FunctionList[m_SelectedFunction].SceneNodes;
 			size_t removeIndex = 0;
@@ -158,24 +177,106 @@ void CodeBoard::OnMessage(Service::MessageType type, void* data)
 
 			if(removeIndex >= m_FunctionList[m_SelectedFunction].CoreNodeCount)
 			{
+				auto& node = sceneNodes[removeIndex].Node;
+				// First remove the connections
+				static Utility::Core::SlotSide slotSides[] = {Utility::Core::SlotSide::Front, 
+															  Utility::Core::SlotSide::Back};
+				for( auto& slotSide : slotSides )
+				{
+					for( auto& slot : node.GetSlots(slotSide) )
+					{
+						if(slot.IsConnected())
+						{
+							RemoveConnections(slot, slotSide);
+						}
+					}
+				}
+
+				// Remove the node
 				sceneNodes.erase(sceneNodes.begin() + removeIndex);
 			}
+
+			break;
+		}
+		case Service::MessageType::ConnectionBegin:
+		{
+			if(m_IsConnecting)
+			{
+				break;
+			}
+
+			auto connectionData = static_cast<Service::ConnectionBeginData*>(data);
+			auto& sceneNode = GetSceneNode(connectionData->Node.GetID());
+			auto& slot = sceneNode.Node.GetSlots(connectionData->SlotSide).at(connectionData->SlotIndex);
+			if(slot.IsConnected() &&
+			   (connectionData->SlotSide == Utility::Core::SlotSide::Back || 
+				slot.GetVariable().GetVariableType() == Utility::Core::VariableType::None))
+			{
+				break;
+			}
+
+			m_ConnectionData.Node = &sceneNode.Node;
+			m_ConnectionData.SlotSide = connectionData->SlotSide;
+			m_ConnectionData.SlotIndex = connectionData->SlotIndex;
+
+			m_IsConnecting = true;
+			break;
+		}
+		case Service::MessageType::ConnectionEnd:
+		{
+			auto connectionData = static_cast<Service::ConnectionEndData*>(data);
+			if(&connectionData->Node == m_ConnectionData.Node)
+			{
+				m_IsConnecting = false;
+				return;
+			}
+
+			// TODO: Implement proper connection
+			
+			if(m_IsConnecting)
+			{
+				if(m_ConnectionData.SlotSide == Utility::Core::SlotSide::Front)
+				{
+					m_ConnectionData.Node->GetFrontSlots()[m_ConnectionData.SlotIndex].Connect(connectionData->Node.GetBackSlots()[connectionData->SlotIndex].GetPort());
+					connectionData->Node.GetBackSlots()[connectionData->SlotIndex].Connect(m_ConnectionData.Node->GetFrontSlots()[m_ConnectionData.SlotIndex].GetPort());
+				}
+				else
+				{
+					m_ConnectionData.Node->GetBackSlots()[m_ConnectionData.SlotIndex].Connect(connectionData->Node.GetFrontSlots()[connectionData->SlotIndex].GetPort());
+					connectionData->Node.GetFrontSlots()[connectionData->SlotIndex].Connect(m_ConnectionData.Node->GetBackSlots()[m_ConnectionData.SlotIndex].GetPort());
+				}
+			}
+
+			m_IsConnecting = false;
+			break;
+		}
+		case Service::MessageType::ConnectionCancel:
+		{
+			m_IsConnectingCancelled = true;
+			break;
+		}
+		case Service::MessageType::ConnectionRemove:
+		{
+			if(m_IsConnecting)
+			{
+				break;
+			}
+
+			auto connectionData = static_cast<Service::ConnectionRemoveData*>(data);
+			
+			auto& slot = connectionData->Node.GetSlots(connectionData->SlotSide)[connectionData->SlotIndex];
+			RemoveConnections(slot, connectionData->SlotSide);
 
 			break;
 		}
 		case Service::MessageType::RequestNode:
 		{
 			auto requestData = static_cast<Service::RequestNodeData*>(data);
-			for( auto& sceneNode : m_FunctionList[m_SelectedFunction].SceneNodes )
-			{
-				if(sceneNode.Node.GetID() == requestData->NodeID)
-				{
-					requestData->Node = &sceneNode.Node;
-					requestData->NodePosition = sceneNode.Position + m_FunctionList[m_SelectedFunction].DragOffset;
-					break;
-				}
-			}
+			auto& sceneNode = GetSceneNode(requestData->NodeID);
 
+			requestData->Node = &sceneNode.Node;
+			requestData->NodePosition = sceneNode.Position + m_FunctionList[m_SelectedFunction].DragOffset;
+			
 			break;
 		}
 	}
@@ -205,6 +306,35 @@ void CodeBoard::OnInput(Service::InputMessageType type, const Service::InputMess
 			}
 			break;
 		}
+	}
+}
+
+CodeBoard::SceneNode& CodeBoard::GetSceneNode(Utility::Core::NodeID nodeID)
+{
+	for( auto& sceneNode : m_FunctionList[m_SelectedFunction].SceneNodes )
+	{
+		if(sceneNode.Node.GetID() == nodeID)
+		{
+			return sceneNode;
+		}
+	}
+
+	return m_FunctionList[m_SelectedFunction].SceneNodes[0];
+}
+void CodeBoard::RemoveConnections(Utility::Core::Slot& slot, Utility::Core::SlotSide slotSide)
+{
+	if(slot.IsConnected())
+	{
+		Utility::Core::SlotSide otherSide = slotSide == Utility::Core::SlotSide::Front ? 
+											Utility::Core::SlotSide::Back : Utility::Core::SlotSide::Front;
+		
+		for( auto& connection : slot.GetConnections() )
+		{
+			auto& other = GetSceneNode(connection.NodeID);
+			other.Node.GetSlots(otherSide)[connection.SlotIndex].Disconnect(slot.GetPort());
+		}
+
+		slot.DisconnectAll();
 	}
 }
 

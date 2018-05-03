@@ -11,6 +11,8 @@ static const Color ErrorColor = Color(1.0f, 0.0f, 1.0f);
 static const Vector2 NodeBaseSize = Vector2(0.3f, 0.075f);
 static constexpr float NodeItemHeight = 0.04f;
 static constexpr float LineThickness = 2.0f;
+static constexpr int ImGuiLeftMouse = 0;
+static constexpr int ImGuiRightMouse = 1;
 static ImVec2 GetImVec2(const Vector2& vec)
 {
 	return {vec.GetX(), vec.GetY()};
@@ -61,15 +63,10 @@ static ImVec2& operator-=(ImVec2& first, const ImVec2& second)
 // Node rendering helpers
 static Vector2 g_LastSlotStartPosition;
 static ImVec2 g_LastSlotWindowSize;
-enum class SlotSide
-{
-	Front,
-	Back
-};
-static ImVec2 GetSlotPosition(const ImVec2& windowPosition, float slotHeight, SlotSide slotSide, size_t index)
+static ImVec2 GetSlotPosition(const ImVec2& windowPosition, float slotHeight, Utility::Core::SlotSide slotSide, size_t index)
 {
 	ImVec2 slotPosition = windowPosition;
-	if(slotSide == SlotSide::Back)
+	if(slotSide == Utility::Core::SlotSide::Back)
 	{
 		slotPosition += {g_LastSlotWindowSize.x * g_LastSlotStartPosition.GetX(), 
 						 g_LastSlotWindowSize.y * g_LastSlotStartPosition.GetY()};
@@ -287,7 +284,9 @@ void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 		g_LastSlotStartPosition = GetCursorPosition();
 		g_LastSlotWindowSize = ImGui::GetWindowSize();
 
-		auto drawSlots = [&SlotHeight](std::vector<Utility::Core::Slot>& slots, SlotSide slotSide)
+		bool isRightClickHandled = false;
+
+		auto drawSlots = [&node, &SlotHeight, &isRightClickHandled](std::vector<Utility::Core::Slot>& slots, Utility::Core::SlotSide slotSide)
 		{
 			for( size_t i=0 ; i<slots.size() ; ++i )
 			{
@@ -301,10 +300,12 @@ void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 				ImVec2 slotPosition = GetSlotPosition(ImGui::GetWindowPos(), SlotHeight, slotSide, i);
 
 				// Draw slot port
+				auto radius = SlotHeight / 4.0f;
+				auto position0 = slotPosition;
+				auto position1 = slotPosition + ImVec2(SlotHeight/2.0f, SlotHeight/2.0f);
+				auto positionCenter = slotPosition + ImVec2(radius, radius);
 				if(isFlow)
 				{
-					auto position0 = slotPosition;
-					auto position1 = slotPosition + ImVec2(SlotHeight/2.0f, SlotHeight/2.0f);
 					auto color = GetImU32(slotColor);
 					if(slot.IsConnected())
 					{
@@ -317,17 +318,47 @@ void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 				}
 				else
 				{
-					auto radius = SlotHeight / 4.0f;
-					auto position = slotPosition + ImVec2(radius, radius);
 					auto color = GetImU32(slotColor);
 					if(slot.IsConnected())
 					{
-						ImGui::GetWindowDrawList()->AddCircleFilled(position, radius, color);
+						ImGui::GetWindowDrawList()->AddCircleFilled(positionCenter, radius, color);
 					}
 					else
 					{
-						ImGui::GetWindowDrawList()->AddCircle(position, radius, color);
+						ImGui::GetWindowDrawList()->AddCircle(positionCenter, radius, color);
 					}
+				}
+
+				// Slot input
+				static bool isConnecting = false;
+				if(ImGui::IsMouseHoveringRect(position0, position1))
+				{
+					if(ImGui::IsMouseDown(ImGuiLeftMouse) &&
+					   isConnecting == false)
+					{
+						Service::ConnectionBeginData data = {node, slotSide, i};
+						Service::MessageSender::Send(Service::MessageType::ConnectionBegin, &data);
+						isConnecting = true;
+					}
+					else if(ImGui::IsMouseReleased(ImGuiLeftMouse))
+					{
+						Service::ConnectionEndData data = {node, slotSide, i};
+						Service::MessageSender::Send(Service::MessageType::ConnectionEnd, &data);
+						isConnecting = false;
+					}
+					else if(ImGui::IsMouseClicked(ImGuiRightMouse) &&
+							isConnecting == false)
+					{
+						Service::ConnectionRemoveData data = {node, slotSide, i};
+						Service::MessageSender::Send(Service::MessageType::ConnectionRemove, &data);
+						isRightClickHandled = true;
+					}
+				}
+				if(ImGui::IsMouseReleased(ImGuiLeftMouse) &&
+				   isConnecting)
+				{
+					Service::MessageSender::Send(Service::MessageType::ConnectionCancel, nullptr);
+					isConnecting = false;
 				}
 				
 				// Draw variable name
@@ -335,7 +366,7 @@ void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 				{
 					ImVec2 cursorPosition = slotPosition - ImGui::GetWindowPos();
 					ImVec2 cursorOffset = ImVec2(SlotHeight*0.75f, -SlotHeight*0.05f);
-					if(slotSide == SlotSide::Front)
+					if(slotSide == Utility::Core::SlotSide::Front)
 					{
 						cursorOffset.x *= -0.25f;
 					}
@@ -348,7 +379,7 @@ void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 					size_t letterCount = variableName.size();
 					float textWidth = GetLogicalVector2(ImGui::CalcTextSize(variableName.c_str())).GetX();
 					float widthDifference = 0.0f;
-					if(slotSide == SlotSide::Back)
+					if(slotSide == Utility::Core::SlotSide::Back)
 					{
 						widthDifference = textWidth - (0.25f - slotNamePosition.GetX());
 					}
@@ -378,7 +409,7 @@ void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 				}
 
 				// Draw input field
-				if(slotSide == SlotSide::Back && 
+				if(slotSide == Utility::Core::SlotSide::Back && 
 				   slotVariableType != Utility::Core::VariableType::None &&
 				   slot.IsConnected() == false)
 				{
@@ -409,20 +440,19 @@ void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 			}
 		};
 
-		drawSlots(node.GetFrontSlots(), SlotSide::Front);
-		drawSlots(node.GetBackSlots(), SlotSide::Back);
+		drawSlots(node.GetFrontSlots(), Utility::Core::SlotSide::Front);
+		drawSlots(node.GetBackSlots(), Utility::Core::SlotSide::Back);
 
 		// Handle input for the node and send commands
 		static Utility::Core::Node* draggingNode = nullptr;
-		static constexpr int ImGuiLeftMouse = 0;
-		static constexpr int ImGuiRightMouse = 1;
 		if(ImGui::IsWindowHovered())
 		{
 			if(ImGui::IsMouseDragging(ImGuiLeftMouse))
 			{
 				draggingNode = &node;
 			}
-			else if(ImGui::IsMouseClicked(ImGuiRightMouse))
+			else if(ImGui::IsMouseClicked(ImGuiRightMouse) &&
+					isRightClickHandled == false)
 			{
 				Service::NodeRemoveData data = {node};
 				Service::MessageSender::Send(Service::MessageType::NodeRemove, &data);
@@ -467,28 +497,55 @@ void Renderer::DrawFrontConnections(const Utility::Core::Node& node, const Vecto
 			Color slotColor = GetSlotColor(slot.GetVariable().GetVariableType());
 			
 			// Get connection and other node
-			auto connection = slot.GetConnection();
+			auto& connections = slot.GetConnections();
 
-			Service::RequestNodeData other = {connection.NodeID};
-			Service::MessageSender::Send(Service::MessageType::RequestNode, &other);
+			for( auto& connection : connections )
+			{
+				Service::RequestNodeData other = {connection.NodeID};
+				Service::MessageSender::Send(Service::MessageType::RequestNode, &other);
 
-			// Calculate the other slots position
-			ImVec2 otherNodePosition = PanelPositionRaw + GetRealImVec(other.NodePosition);
-			
-			// Draw
-			auto radius = SlotHeight / 4.0f;
-			auto position0 = GetSlotPosition(nodePosition, SlotHeight, SlotSide::Front, i) + ImVec2(radius, radius);
-			auto position1 = GetSlotPosition(otherNodePosition, SlotHeight, SlotSide::Back, connection.SlotIndex) + ImVec2(radius, radius);
-			auto color = GetImU32(slotColor);
-			ImVec2 cp0 = ImVec2(position1.x, position0.y);
-			ImVec2 cp1 = ImVec2(position0.x, position1.y);
-			ImGui::GetWindowDrawList()->AddBezierCurve(position0, cp0, cp1, position1, 
-													   color, LineThickness);
+				// Calculate the other slots position
+				ImVec2 otherNodePosition = PanelPositionRaw + GetRealImVec(other.NodePosition);
+
+				// Draw
+				auto radius = SlotHeight / 4.0f;
+				auto position0 = GetSlotPosition(nodePosition, SlotHeight, Utility::Core::SlotSide::Front, i) + ImVec2(radius, radius);
+				auto position1 = GetSlotPosition(otherNodePosition, SlotHeight, Utility::Core::SlotSide::Back, connection.SlotIndex) + ImVec2(radius, radius);
+				auto color = GetImU32(slotColor);
+				ImVec2 cp0 = ImVec2(position1.x, position0.y);
+				ImVec2 cp1 = ImVec2(position0.x, position1.y);
+				ImGui::GetWindowDrawList()->AddBezierCurve(position0, cp0, cp1, position1, 
+														   color, LineThickness);
+			}
 		}
 
 		ImGui::PopID();
 	}
 	ImGui::PopID();
+}
+void Renderer::DrawConnectionToMouse(const Utility::Core::Node& node, const Vector2& position, Utility::Core::SlotSide slotSide, size_t slotIndex)
+{
+	const float SlotHeight = ImGui::GetWindowSize().y * NodeItemHeight;
+	const ImVec2 PanelPositionRaw = ImGui::GetWindowPos();
+
+	ImVec2 nodePosition = PanelPositionRaw + GetRealImVec(position);
+
+	// Select color based on the variable type
+	auto& slot = node.GetSlots(slotSide)[slotIndex];
+
+	Color slotColor = GetSlotColor(slot.GetVariable().GetVariableType());
+
+	ImVec2 mousePosition = ImGui::GetMousePos();
+
+	// Draw
+	auto radius = SlotHeight / 4.0f;
+	auto position0 = GetSlotPosition(nodePosition, SlotHeight, slotSide, slotIndex) + ImVec2(radius, radius);
+	auto position1 = mousePosition;
+	auto color = GetImU32(slotColor);
+	ImVec2 cp0 = ImVec2(position1.x, position0.y);
+	ImVec2 cp1 = ImVec2(position0.x, position1.y);
+	ImGui::GetWindowDrawList()->AddBezierCurve(position0, cp0, cp1, position1, 
+											   color, LineThickness);
 }
 
 } // namespace Koala::Editor::Gfx

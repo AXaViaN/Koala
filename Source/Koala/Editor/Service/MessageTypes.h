@@ -15,6 +15,7 @@ enum class LogType;
 }
 namespace Koala::Utility::Core {
 class Node;
+enum class SlotSide;
 using NodeID = size_t;
 }
 
@@ -50,6 +51,10 @@ struct InputMessageData
 	\
 	value(NodeMove) \
 	value(NodeRemove) \
+	value(ConnectionBegin) \
+	value(ConnectionEnd) \
+	value(ConnectionCancel) \
+	value(ConnectionRemove) \
 	\
 	value(RequestNode)
 
@@ -73,6 +78,14 @@ struct NodeRemoveData
 {
 	const Utility::Core::Node& Node;
 };
+struct ConnectionBeginData
+{
+	Utility::Core::Node& Node;
+	const Utility::Core::SlotSide SlotSide;
+	const size_t SlotIndex;
+};
+using ConnectionEndData = ConnectionBeginData;
+using ConnectionRemoveData = ConnectionBeginData;
 
 struct RequestNodeData
 {

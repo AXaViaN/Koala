@@ -61,4 +61,27 @@ std::vector<Slot>& Node::GetFrontSlots()
 	return m_FrontSlots;
 }
 
+const std::vector<Slot>& Node::GetSlots(SlotSide slotSide) const
+{
+	if(slotSide == SlotSide::Front)
+	{
+		return GetFrontSlots();
+	}
+	else
+	{
+		return GetBackSlots();
+	}
+}
+std::vector<Slot>& Node::GetSlots(SlotSide slotSide)
+{
+	if(slotSide == SlotSide::Front)
+	{
+		return GetFrontSlots();
+	}
+	else
+	{
+		return GetBackSlots();
+	}
+}
+
 } // namespace Koala::Utility::Core

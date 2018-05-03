@@ -40,6 +40,7 @@ public:
 
 	static void DrawNode(Utility::Core::Node& node, const Vector2& position);
 	static void DrawFrontConnections(const Utility::Core::Node& node, const Vector2& position);
+	static void DrawConnectionToMouse(const Utility::Core::Node& node, const Vector2& position, Utility::Core::SlotSide slotSide, size_t slotIndex);
 
 };
 

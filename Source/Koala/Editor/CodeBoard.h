@@ -16,17 +16,30 @@ public:
 private:
 	struct SceneNode;
 	struct Function;
+	struct ConnectionData
+	{
+		Utility::Core::Node* Node;
+		Utility::Core::SlotSide SlotSide;
+		size_t SlotIndex;
+	};
 
 private:
 	virtual void OnGui() override;
 	virtual void OnMessage(Service::MessageType type, void* data) override;
 	virtual void OnInput(Service::InputMessageType type, const Service::InputMessageData& data) override;
 
+	SceneNode& GetSceneNode(Utility::Core::NodeID nodeID);
+	void RemoveConnections(Utility::Core::Slot& slot, Utility::Core::SlotSide slotSide);
+
 private:
 	const Tool::Window& m_Window;
 
 	std::vector<Function> m_FunctionList;
 	size_t m_SelectedFunction;
+
+	ConnectionData m_ConnectionData;
+	bool m_IsConnecting = false;
+	bool m_IsConnectingCancelled = false;
 
 };
 
@@ -37,7 +50,6 @@ struct CodeBoard::SceneNode
 };
 struct CodeBoard::Function
 {
-	std::string Name;
 	std::vector<SceneNode> SceneNodes;
 	size_t CoreNodeCount = 1;
 

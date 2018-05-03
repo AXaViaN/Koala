@@ -81,13 +81,10 @@ CodeBoard::CodeBoard(const Tool::Window& window) :
 
 	// Test connections
 #if 1
-	m_FunctionList[0].SceneNodes[0].Node.GetFrontSlots()[0].Connect(m_FunctionList[0].SceneNodes[1].Node.GetBackSlots()[0].GetPort());
-	m_FunctionList[0].SceneNodes[1].Node.GetBackSlots()[0].Connect(m_FunctionList[0].SceneNodes[0].Node.GetFrontSlots()[0].GetPort());
+	m_FunctionList[0].SceneNodes[0].Node.GetFrontSlots()[0].Connect(m_FunctionList[0].SceneNodes[1].Node.GetBackSlots()[0]);
 
-	m_FunctionList[1].SceneNodes[0].Node.GetFrontSlots()[0].Connect(m_FunctionList[1].SceneNodes[1].Node.GetBackSlots()[0].GetPort());
-	m_FunctionList[1].SceneNodes[1].Node.GetBackSlots()[0].Connect(m_FunctionList[1].SceneNodes[0].Node.GetFrontSlots()[0].GetPort());
-	m_FunctionList[1].SceneNodes[0].Node.GetFrontSlots()[1].Connect(m_FunctionList[1].SceneNodes[1].Node.GetBackSlots()[1].GetPort());
-	m_FunctionList[1].SceneNodes[1].Node.GetBackSlots()[1].Connect(m_FunctionList[1].SceneNodes[0].Node.GetFrontSlots()[1].GetPort());
+	m_FunctionList[1].SceneNodes[0].Node.GetFrontSlots()[0].Connect(m_FunctionList[1].SceneNodes[1].Node.GetBackSlots()[0]);
+	m_FunctionList[1].SceneNodes[0].Node.GetFrontSlots()[1].Connect(m_FunctionList[1].SceneNodes[1].Node.GetBackSlots()[1]);
 #endif
 
 	m_SelectedFunction = 0;
@@ -224,28 +221,32 @@ void CodeBoard::OnMessage(Service::MessageType type, void* data)
 		}
 		case Service::MessageType::ConnectionEnd:
 		{
-			auto connectionData = static_cast<Service::ConnectionEndData*>(data);
-			if(&connectionData->Node == m_ConnectionData.Node)
+			if(m_IsConnecting == false)
 			{
-				m_IsConnecting = false;
-				return;
+				break;
 			}
 
-			// TODO: Implement proper connection
-			
-			if(m_IsConnecting)
+			auto otherConnectionData = static_cast<Service::ConnectionEndData*>(data);
+
+			auto& slot0 = m_ConnectionData.Node->GetSlots(m_ConnectionData.SlotSide).at(m_ConnectionData.SlotIndex);
+			auto& slot1 = otherConnectionData->Node.GetSlots(otherConnectionData->SlotSide).at(otherConnectionData->SlotIndex);
+			if(&otherConnectionData->Node == m_ConnectionData.Node || 
+			   otherConnectionData->SlotSide == m_ConnectionData.SlotSide || 
+			   slot0.GetVariable().GetVariableType() != slot1.GetVariable().GetVariableType())
 			{
-				if(m_ConnectionData.SlotSide == Utility::Core::SlotSide::Front)
-				{
-					m_ConnectionData.Node->GetFrontSlots()[m_ConnectionData.SlotIndex].Connect(connectionData->Node.GetBackSlots()[connectionData->SlotIndex].GetPort());
-					connectionData->Node.GetBackSlots()[connectionData->SlotIndex].Connect(m_ConnectionData.Node->GetFrontSlots()[m_ConnectionData.SlotIndex].GetPort());
-				}
-				else
-				{
-					m_ConnectionData.Node->GetBackSlots()[m_ConnectionData.SlotIndex].Connect(connectionData->Node.GetFrontSlots()[connectionData->SlotIndex].GetPort());
-					connectionData->Node.GetFrontSlots()[connectionData->SlotIndex].Connect(m_ConnectionData.Node->GetBackSlots()[m_ConnectionData.SlotIndex].GetPort());
-				}
+				m_IsConnecting = false;
+				break;
 			}
+
+			// Flow connections can't be multiple
+			if(slot1.GetVariable().GetVariableType() == Utility::Core::VariableType::None && 
+			   slot1.IsConnected())
+			{
+				m_IsConnecting = false;
+				break;
+			}
+
+			slot0.Connect(slot1);
 
 			m_IsConnecting = false;
 			break;

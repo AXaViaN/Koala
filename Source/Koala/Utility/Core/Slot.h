@@ -22,9 +22,10 @@ public:
 		m_Variable(variableTemplate)
 	{ }
 
-	void Connect(const Port& port)
+	void Connect(Slot& slot)
 	{
-		m_Connections.emplace_back(port);
+		this->m_Connections.emplace_back(slot.m_Port);
+		slot.m_Connections.emplace_back(this->m_Port);
 	}
 	void Disconnect(const Port& port)
 	{

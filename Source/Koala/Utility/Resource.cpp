@@ -22,6 +22,9 @@ void Resource::Initialize(bool loadIcons)
 		Instance().m_IconMap[Icon::Settings] = LoadTexture("Data/Icon/settings.png");
 		Instance().m_IconMap[Icon::Compile] = LoadTexture("Data/Icon/compile.png");
 		Instance().m_IconMap[Icon::Run] = LoadTexture("Data/Icon/run.png");
+
+		Instance().m_IconMap[Icon::NewFunction] = LoadTexture("Data/Icon/new_function.png");
+		Instance().m_IconMap[Icon::NewVariable] = LoadTexture("Data/Icon/new_variable.png");
 	}
 }
 

@@ -96,7 +96,10 @@ enum class Icon
 	Save,
 	Settings,
 	Compile,
-	Run
+	Run,
+
+	NewFunction,
+	NewVariable,
 };
 
 } // namespace Koala::Utility

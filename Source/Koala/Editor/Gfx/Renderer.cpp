@@ -174,13 +174,26 @@ Vector2 Renderer::GetCursorPosition()
 	return pos;
 }
 
-void Renderer::DrawText(const std::string& str)
+bool Renderer::DrawText(const std::string& str)
 {
+	ImVec2 textRectMin = ImGui::GetWindowPos() + ImGui::GetCursorPos();
+
 	ImGui::Text(str.c_str());
+	float textItemWidth = ImGui::CalcItemWidth();
+
+	ImVec2 textRectMax = ImGui::GetWindowPos() + ImVec2(textItemWidth, ImGui::GetCursorPos().y);
+	
+	if(ImGui::IsMouseHoveringRect(textRectMin, textRectMax) && 
+	   ImGui::IsMouseClicked(ImGuiLeftMouse))
+	{
+		return true;
+	}
+
+	return false;
 }
-void Renderer::DrawText(Utility::Text text)
+bool Renderer::DrawText(Utility::Text text)
 {
-	ImGui::Text(Utility::Resource::GetText(text).c_str());
+	return DrawText(Utility::Resource::GetText(text));
 }
 bool Renderer::DrawButton(const std::string& str, const Vector2& size, bool highlight)
 {

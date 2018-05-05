@@ -6,14 +6,16 @@ namespace Koala::Utility::Core {
 static IDGenerator g_IDGenerator;
 
 Node::Node(FunctionID functionID) : 
-	m_ID(g_IDGenerator.GetNextID()),
 	m_FunctionID(functionID)
 {
 	auto& functionInfo = FunctionManager::Get(m_FunctionID);
 	if(functionInfo.ID == 0)
 	{
+		m_ID = 0;
 		return;
 	}
+
+	m_ID = g_IDGenerator.GetNextID();
 
 	for( size_t i=0 ; i<functionInfo.BackSlots.size() ; ++i )
 	{

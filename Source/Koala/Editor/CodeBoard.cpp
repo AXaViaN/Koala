@@ -5,8 +5,6 @@
 
 namespace Koala::Editor {
 
-static void SetupDefaultFunctions(Utility::Core::Node& programNode);
-
 CodeBoard::CodeBoard(const Tool::Window& window) :
 	Gfx::Panel(window, 
 			   Gfx::Vector2(CodeBoardStartPosition().GetX(), 
@@ -20,10 +18,15 @@ CodeBoard::CodeBoard(const Tool::Window& window) :
 
 	m_FunctionList.emplace_back();
 	m_FunctionList.back().SceneNodes.emplace_back();
-	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.05f, 0.1f);
+	{
+		auto& programFunctionInfo = Utility::Core::FunctionManager::GetDefault(Utility::Text::Program);
+
+		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionInfo.ID);
+		m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.05f, 0.1f);
+	}
 
 	// Test nodes
-#if 1
+#if 0
 	m_FunctionList.back().SceneNodes.emplace_back();
 	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.5f, 0.5f);
 	{
@@ -77,10 +80,8 @@ CodeBoard::CodeBoard(const Tool::Window& window) :
 	}
 #endif
 
-	SetupDefaultFunctions(m_FunctionList[0].SceneNodes[0].Node);
-
 	// Test connections
-#if 1
+#if 0
 	m_FunctionList[0].SceneNodes[0].Node.GetFrontSlots()[0].Connect(m_FunctionList[0].SceneNodes[1].Node.GetBackSlots()[0]);
 
 	m_FunctionList[1].SceneNodes[0].Node.GetFrontSlots()[0].Connect(m_FunctionList[1].SceneNodes[1].Node.GetBackSlots()[0]);
@@ -280,6 +281,24 @@ void CodeBoard::OnMessage(Service::MessageType type, void* data)
 			
 			break;
 		}
+		case Service::MessageType::SpawnNode:
+		{
+			auto spawnData = static_cast<Service::SpawnNodeData*>(data);
+
+			auto node = Utility::Core::Node(spawnData->FunctionID);
+			if(node.GetID() == 0)
+			{
+				break;
+			}
+
+			auto& currentSceneNodes = m_FunctionList[m_SelectedFunction].SceneNodes;
+			currentSceneNodes.emplace_back();
+			currentSceneNodes.back().Node = node;
+			currentSceneNodes.back().Position = Gfx::Vector2(0.35f, 0.35f) - 
+												m_FunctionList[m_SelectedFunction].DragOffset;
+			
+			break;
+		}
 	}
 }
 void CodeBoard::OnInput(Service::InputMessageType type, const Service::InputMessageData& data)
@@ -336,19 +355,6 @@ void CodeBoard::RemoveConnections(Utility::Core::Slot& slot, Utility::Core::Slot
 		}
 
 		slot.DisconnectAll();
-	}
-}
-
-static void SetupDefaultFunctions(Utility::Core::Node& programNode)
-{
-	// Program node
-	{
-		Utility::Core::FunctionInfo functionInfo;
-		functionInfo.NameText = Utility::Text::Program;
-		functionInfo.FrontSlots.emplace_back("", Utility::Core::VariableType::None);
-
-		size_t programFunctionID = Utility::Core::FunctionManager::Add(functionInfo);
-		programNode = Utility::Core::Node(programFunctionID);
 	}
 }
 

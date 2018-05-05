@@ -22,6 +22,8 @@ Palette::Palette(const Tool::Window& window) :
 		Utility::Text::ReadNumber,
 		Utility::Text::ReadString,
 	};
+
+	// TODO: Add flow etc.
 }
 
 void Palette::OnGui()
@@ -37,7 +39,13 @@ void Palette::OnGui()
 		{
 			for( auto& function : category.second )
 			{
-				Renderer::DrawText(function);
+				if(Renderer::DrawText(function))
+				{
+					auto& functionInfo = Utility::Core::FunctionManager::GetDefault(function);
+
+					Service::SpawnNodeData data = {functionInfo.ID};
+					SendMessage(Service::MessageType::SpawnNode, &data);
+				}
 			}
 
 			Renderer::EndTree();

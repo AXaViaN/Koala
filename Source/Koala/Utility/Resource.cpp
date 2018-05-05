@@ -68,6 +68,8 @@ Resource::Resource()
 	m_TextMap[Text::Print] = u8"Yazdir";
 	m_TextMap[Text::ReadNumber] = u8"Sayi Oku";
 	m_TextMap[Text::ReadString] = u8"Yazi Oku";
+
+	m_TextMap[Text::Result] = u8"Sonuc";
 }
 Resource::~Resource() noexcept
 {

@@ -26,6 +26,7 @@ public:
 	static bool Remove(FunctionID id);
 	static bool Edit(FunctionID id, const FunctionInfo& functionInfo);
 	static const FunctionInfo& Get(FunctionID id);
+	static const FunctionInfo& GetDefault(Text name);
 
 };
 

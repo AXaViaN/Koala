@@ -36,8 +36,8 @@ public:
 	}
 
 private:
-	NodeID m_ID;
-	FunctionID m_FunctionID;
+	NodeID m_ID = 0;
+	FunctionID m_FunctionID = 0;
 
 	std::vector<Slot> m_BackSlots;
 	std::vector<Slot> m_FrontSlots;

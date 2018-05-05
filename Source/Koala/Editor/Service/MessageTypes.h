@@ -17,6 +17,7 @@ namespace Koala::Utility::Core {
 class Node;
 enum class SlotSide;
 using NodeID = size_t;
+using FunctionID = size_t;
 }
 
 namespace Koala::Editor::Service {
@@ -56,7 +57,8 @@ struct InputMessageData
 	value(ConnectionCancel) \
 	value(ConnectionRemove) \
 	\
-	value(RequestNode)
+	value(RequestNode) \
+	value(SpawnNode)
 
 DECLARE_ENUM(MessageType, MESSAGE_TYPES)
 
@@ -92,6 +94,10 @@ struct RequestNodeData
 	const Utility::Core::NodeID NodeID = 0;
 	const Utility::Core::Node* Node;
 	Gfx::Vector2 NodePosition;
+};
+struct SpawnNodeData
+{
+	const Utility::Core::FunctionID FunctionID;
 };
 
 } // namespace Koala::Editor::Service

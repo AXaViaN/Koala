@@ -35,7 +35,7 @@ static void PrintMessageToConsole(const char* const format, ...)
 	}
 	else
 	{
-		std::printf("\r%s (%zu)", currentMessage.c_str(), repeatCount++);
+		std::printf("\r%s (%zu)", currentMessage.c_str(), ++repeatCount);
 	}
 
 	va_end(argList);

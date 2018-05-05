@@ -69,6 +69,8 @@ enum class Text
 	Print,
 	ReadNumber,
 	ReadString,
+
+	Result,
 };
 
 enum class Icon

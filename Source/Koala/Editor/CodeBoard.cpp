@@ -25,35 +25,8 @@ CodeBoard::CodeBoard(const Tool::Window& window) :
 		m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.05f, 0.1f);
 	}
 
-	// Test nodes
+	// Test user functions
 #if 0
-	m_FunctionList.back().SceneNodes.emplace_back();
-	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.5f, 0.5f);
-	{
-		Utility::Core::FunctionInfo functionInfo;
-		functionInfo.Name = "Topla";
-		functionInfo.BackSlots.emplace_back("", Utility::Core::VariableType::None);
-		functionInfo.BackSlots.emplace_back("X", Utility::Core::VariableType::Float64);
-		functionInfo.BackSlots.emplace_back("Y", Utility::Core::VariableType::Float64);
-		functionInfo.FrontSlots.emplace_back("", Utility::Core::VariableType::None);
-		functionInfo.FrontSlots.emplace_back("Sonuc", Utility::Core::VariableType::Float64);
-
-		size_t programFunctionID = Utility::Core::FunctionManager::Add(functionInfo);
-		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionID);
-	}
-	m_FunctionList.back().SceneNodes.emplace_back();
-	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.25f, 0.75f);
-	{
-		Utility::Core::FunctionInfo functionInfo;
-		functionInfo.Name = "Sayi Oku";
-		functionInfo.BackSlots.emplace_back("", Utility::Core::VariableType::None);
-		functionInfo.FrontSlots.emplace_back("", Utility::Core::VariableType::None);
-		functionInfo.FrontSlots.emplace_back("Sayi", Utility::Core::VariableType::Float64);
-
-		size_t programFunctionID = Utility::Core::FunctionManager::Add(functionInfo);
-		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionID);
-	}
-
 	m_FunctionList.emplace_back();
 	m_FunctionList.back().SceneNodes.emplace_back();
 	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.7f, 0.3f);
@@ -66,26 +39,6 @@ CodeBoard::CodeBoard(const Tool::Window& window) :
 		size_t programFunctionID = Utility::Core::FunctionManager::Add(functionInfo);
 		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionID);
 	}
-	m_FunctionList.back().SceneNodes.emplace_back();
-	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.2f, 0.7f);
-	{
-		Utility::Core::FunctionInfo functionInfo;
-		functionInfo.Name = "Yazdir";
-		functionInfo.BackSlots.emplace_back("", Utility::Core::VariableType::None);
-		functionInfo.BackSlots.emplace_back("", Utility::Core::VariableType::String);
-		functionInfo.FrontSlots.emplace_back("", Utility::Core::VariableType::None);
-
-		size_t programFunctionID = Utility::Core::FunctionManager::Add(functionInfo);
-		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionID);
-	}
-#endif
-
-	// Test connections
-#if 0
-	m_FunctionList[0].SceneNodes[0].Node.GetFrontSlots()[0].Connect(m_FunctionList[0].SceneNodes[1].Node.GetBackSlots()[0]);
-
-	m_FunctionList[1].SceneNodes[0].Node.GetFrontSlots()[0].Connect(m_FunctionList[1].SceneNodes[1].Node.GetBackSlots()[0]);
-	m_FunctionList[1].SceneNodes[0].Node.GetFrontSlots()[1].Connect(m_FunctionList[1].SceneNodes[1].Node.GetBackSlots()[1]);
 #endif
 
 	m_SelectedFunction = 0;

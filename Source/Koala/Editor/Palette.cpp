@@ -22,8 +22,14 @@ Palette::Palette(const Tool::Window& window) :
 		Utility::Text::ReadNumber,
 		Utility::Text::ReadString,
 	};
-
-	// TODO: Add flow etc.
+	m_FunctionList[Utility::Text::Flow] = {
+		Utility::Text::If,
+		Utility::Text::Loop,
+	};
+	m_FunctionList[Utility::Text::General] = {
+		Utility::Text::NumberToString,
+		Utility::Text::StringToNumber,
+	};
 }
 
 void Palette::OnGui()

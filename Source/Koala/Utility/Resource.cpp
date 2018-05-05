@@ -54,10 +54,7 @@ Resource::Resource()
 	m_TextMap[Text::Functions] = u8"Fonksiyonlar";
 	m_TextMap[Text::Variables] = u8"Degiskenler";
 
-	m_TextMap[Text::Search] = u8"Ara";
 	m_TextMap[Text::Arithmetic] = u8"Aritmetik";
-	m_TextMap[Text::System] = u8"Sistem";
-
 	m_TextMap[Text::Add] = u8"Topla";
 	m_TextMap[Text::Subtract] = u8"Çikart";
 	m_TextMap[Text::Multiply] = u8"Çarp";
@@ -65,11 +62,28 @@ Resource::Resource()
 	m_TextMap[Text::SquareRoot] = u8"Kare Kök";
 	m_TextMap[Text::Power] = u8"Üs";
 	m_TextMap[Text::Modulo] = u8"Mod";
+
+	m_TextMap[Text::System] = u8"Sistem";
 	m_TextMap[Text::Print] = u8"Yazdir";
 	m_TextMap[Text::ReadNumber] = u8"Sayi Oku";
 	m_TextMap[Text::ReadString] = u8"Yazi Oku";
 
+	m_TextMap[Text::Flow] = u8"Akis";
+	m_TextMap[Text::If] = u8"Eger";
+	m_TextMap[Text::Loop] = u8"Döngü";
+	m_TextMap[Text::IfTrue] = u8"Dogru Ise";
+	m_TextMap[Text::IfFalse] = u8"Yanlis Ise";
+
+	m_TextMap[Text::General] = u8"Genel";
+	m_TextMap[Text::NumberToString] = u8"Sayiyi Yaziya Dönüstür";
+	m_TextMap[Text::StringToNumber] = u8"Yaziyi Sayiya Dönüstür";
+
+	m_TextMap[Text::Search] = u8"Ara";
 	m_TextMap[Text::Result] = u8"Sonuc";
+	m_TextMap[Text::Value] = u8"Deger";
+	m_TextMap[Text::Start] = u8"Basla";
+	m_TextMap[Text::End] = u8"Bitir";
+	m_TextMap[Text::Index] = u8"Indeks";
 }
 Resource::~Resource() noexcept
 {

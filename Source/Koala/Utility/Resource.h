@@ -55,10 +55,7 @@ enum class Text
 	Functions,
 	Variables,
 
-	Search,
 	Arithmetic,
-	System,
-
 	Add,
 	Subtract,
 	Multiply,
@@ -66,11 +63,28 @@ enum class Text
 	SquareRoot,
 	Power,
 	Modulo,
+
+	System,
 	Print,
 	ReadNumber,
 	ReadString,
 
+	Flow,
+	If,
+	Loop,
+	IfTrue,
+	IfFalse,
+
+	General,
+	NumberToString,
+	StringToNumber,
+
+	Search,
 	Result,
+	Value,
+	Start,
+	End,
+	Index,
 };
 
 enum class Icon

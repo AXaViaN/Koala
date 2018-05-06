@@ -101,6 +101,10 @@ static Color GetSlotColor(Utility::Core::VariableType slotVariableType, bool* is
 	{
 		return Color(0.5f, 1.0f, 0.7f);
 	}
+	else if(slotVariableType == Utility::Core::VariableType::Boolean)
+	{
+		return Color(0.7f, 0.5f, 1.0f);
+	}
 	else
 	{
 		return ErrorColor;
@@ -445,6 +449,15 @@ void Renderer::DrawNode(Utility::Core::Node& node, const Vector2& position)
 						auto value = slot.GetVariable().GetValueFloat64();
 						ImGui::InputDouble("", &value);
 						slot.GetVariable().SetValueFloat64(value);
+					}
+					else if(slotVariableType == Utility::Core::VariableType::Boolean)
+					{
+						int value = slot.GetVariable().GetValueBoolean();
+						const char* comboItems[] = {Utility::Resource::GetText(Utility::Text::False).c_str(), 
+													Utility::Resource::GetText(Utility::Text::True).c_str()};
+
+						ImGui::Combo("", &value, comboItems, 2);
+						slot.GetVariable().SetValueBoolean(value);
 					}
 					ImGui::PopItemWidth();
 				}

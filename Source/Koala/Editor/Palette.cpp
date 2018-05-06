@@ -24,9 +24,16 @@ Palette::Palette(const Tool::Window& window) :
 	};
 	m_FunctionList[Utility::Text::Flow] = {
 		Utility::Text::If,
-		Utility::Text::Loop,
+		Utility::Text::ForLoop,
+		Utility::Text::WhileLoop,
 	};
 	m_FunctionList[Utility::Text::General] = {
+		Utility::Text::Greater,
+		Utility::Text::Smaller,
+		Utility::Text::And,
+		Utility::Text::Or,
+		Utility::Text::NumberEquals,
+		Utility::Text::StringEquals,
 		Utility::Text::NumberToString,
 		Utility::Text::StringToNumber,
 	};

@@ -52,6 +52,14 @@ public:
 	{
 		return m_ValueString;
 	}
+	void SetValueBoolean(bool value)
+	{
+		m_ValueBoolean = value;
+	}
+	bool GetValueBoolean() const
+	{
+		return m_ValueBoolean;
+	}
 
 private:
 	std::string m_Name;
@@ -60,6 +68,7 @@ private:
 
 	double m_ValueFloat64 = 0.0f;
 	std::string m_ValueString;
+	bool m_ValueBoolean = false;
 
 };
 
@@ -68,7 +77,8 @@ enum class VariableType
 	None,
 
 	Float64,
-	String
+	String,
+	Boolean
 };
 
 } // namespace Koala::Utility::Core

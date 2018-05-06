@@ -71,11 +71,22 @@ enum class Text
 
 	Flow,
 	If,
+	ForLoop,
+	WhileLoop,
 	Loop,
+	Condition,
+	True,
+	False,
 	IfTrue,
 	IfFalse,
 
 	General,
+	Greater,
+	Smaller,
+	And,
+	Or,
+	NumberEquals,
+	StringEquals,
 	NumberToString,
 	StringToNumber,
 

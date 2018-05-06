@@ -73,11 +73,22 @@ Resource::Resource()
 
 	m_TextMap[Text::Flow] = u8"Akis";
 	m_TextMap[Text::If] = u8"Eger";
+	m_TextMap[Text::ForLoop] = u8"Sirali Döngü";
+	m_TextMap[Text::WhileLoop] = u8"Kosullu Döngü";
 	m_TextMap[Text::Loop] = u8"Döngü";
+	m_TextMap[Text::Condition] = u8"Sart";
+	m_TextMap[Text::True] = u8"Dogru";
+	m_TextMap[Text::False] = u8"Yanlis";
 	m_TextMap[Text::IfTrue] = u8"Dogru Ise";
 	m_TextMap[Text::IfFalse] = u8"Yanlis Ise";
 
 	m_TextMap[Text::General] = u8"Genel";
+	m_TextMap[Text::Greater] = u8"Büyüktür";
+	m_TextMap[Text::Smaller] = u8"Küçüktür";
+	m_TextMap[Text::And] = u8"Ve";
+	m_TextMap[Text::Or] = u8"Veya";
+	m_TextMap[Text::NumberEquals] = u8"Sayi Esittir";
+	m_TextMap[Text::StringEquals] = u8"Yazi Esittir";
 	m_TextMap[Text::NumberToString] = u8"Sayiyi Yaziya Dönüstür";
 	m_TextMap[Text::StringToNumber] = u8"Yaziyi Sayiya Dönüstür";
 

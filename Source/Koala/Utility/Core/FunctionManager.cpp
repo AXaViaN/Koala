@@ -195,23 +195,83 @@ static char SetupDefaultFunctions()
 		FunctionInfo functionInfo;
 		functionInfo.NameText = Text::If;
 		functionInfo.BackSlots.emplace_back("", VariableType::None);
-		functionInfo.BackSlots.emplace_back(Text::Value, VariableType::Float64);
+		functionInfo.BackSlots.emplace_back(Text::Condition, VariableType::Boolean);
 		functionInfo.FrontSlots.emplace_back(Text::IfTrue, VariableType::None);
 		functionInfo.FrontSlots.emplace_back(Text::IfFalse, VariableType::None);
 
 		FunctionManager::Add(functionInfo);
 	}
 
-	// Loop
+	// ForLoop
 	{
 		FunctionInfo functionInfo;
-		functionInfo.NameText = Text::Loop;
+		functionInfo.NameText = Text::ForLoop;
 		functionInfo.BackSlots.emplace_back("", VariableType::None);
 		functionInfo.BackSlots.emplace_back(Text::Start, VariableType::Float64);
 		functionInfo.BackSlots.emplace_back(Text::End, VariableType::Float64);
 		functionInfo.FrontSlots.emplace_back("", VariableType::None);
 		functionInfo.FrontSlots.emplace_back(Text::Index, VariableType::Float64);
 		functionInfo.FrontSlots.emplace_back(Text::Loop, VariableType::None);
+
+		FunctionManager::Add(functionInfo);
+	}
+
+	// WhileLoop
+	{
+		FunctionInfo functionInfo;
+		functionInfo.NameText = Text::WhileLoop;
+		functionInfo.BackSlots.emplace_back("", VariableType::None);
+		functionInfo.BackSlots.emplace_back(Text::Condition, VariableType::Boolean);
+		functionInfo.FrontSlots.emplace_back("", VariableType::None);
+		functionInfo.FrontSlots.emplace_back(Text::Loop, VariableType::None);
+
+		FunctionManager::Add(functionInfo);
+	}
+
+	// Greater, Smaller, NumberEquals
+	{
+		FunctionInfo functionInfo;
+		functionInfo.NameText = Text::Greater;
+		functionInfo.BackSlots.emplace_back("", VariableType::None);
+		functionInfo.BackSlots.emplace_back("X", VariableType::Float64);
+		functionInfo.BackSlots.emplace_back("Y", VariableType::Float64);
+		functionInfo.FrontSlots.emplace_back("", VariableType::None);
+		functionInfo.FrontSlots.emplace_back("", VariableType::Boolean);
+
+		FunctionManager::Add(functionInfo);
+
+		functionInfo.NameText = Text::Smaller;
+		FunctionManager::Add(functionInfo);
+
+		functionInfo.NameText = Text::NumberEquals;
+		FunctionManager::Add(functionInfo);
+	}
+
+	// And, Or
+	{
+		FunctionInfo functionInfo;
+		functionInfo.NameText = Text::And;
+		functionInfo.BackSlots.emplace_back("", VariableType::None);
+		functionInfo.BackSlots.emplace_back("X", VariableType::Boolean);
+		functionInfo.BackSlots.emplace_back("Y", VariableType::Boolean);
+		functionInfo.FrontSlots.emplace_back("", VariableType::None);
+		functionInfo.FrontSlots.emplace_back("", VariableType::Boolean);
+
+		FunctionManager::Add(functionInfo);
+
+		functionInfo.NameText = Text::Or;
+		FunctionManager::Add(functionInfo);
+	}
+
+	// StringEquals
+	{
+		FunctionInfo functionInfo;
+		functionInfo.NameText = Text::StringEquals;
+		functionInfo.BackSlots.emplace_back("", VariableType::None);
+		functionInfo.BackSlots.emplace_back("X", VariableType::String);
+		functionInfo.BackSlots.emplace_back("Y", VariableType::String);
+		functionInfo.FrontSlots.emplace_back("", VariableType::None);
+		functionInfo.FrontSlots.emplace_back("", VariableType::Boolean);
 
 		FunctionManager::Add(functionInfo);
 	}

@@ -200,6 +200,22 @@ void CodeBoard::OnMessage(Service::MessageType type, void* data)
 				break;
 			}
 
+			// Back connections can't be multiple
+			Utility::Core::Slot* backSlot;
+			if(m_ConnectionData.SlotSide == Utility::Core::SlotSide::Back)
+			{
+				backSlot = &slot0;
+			}
+			else
+			{
+				backSlot = &slot1;
+			}
+			if(backSlot->IsConnected())
+			{
+				m_IsConnecting = false;
+				break;
+			}
+
 			slot0.Connect(slot1);
 
 			m_IsConnecting = false;

@@ -60,6 +60,19 @@ void Main::Run()
 	while(m_MainWindow.IsValid())
 	{
 		m_MainWindow.Activate();
+		{
+			std::string title = Utility::Resource::GetText(Utility::Text::KoalaEditor) + " - ";
+			if(m_ProjectName.size() == 0)
+			{
+				title += Utility::Resource::GetText(Utility::Text::NewProject);
+			}
+			else
+			{
+				title += m_ProjectName;
+			}
+
+			m_MainWindow.RenameTitle(title);
+		}
 
 		Gfx::Renderer::ClearViewport(Gfx::Color(0.2f, 0.4f, 0.8f));
 		for( auto& panel : panels )
@@ -81,28 +94,25 @@ void Main::Run()
 
 void Main::OnMessage(Service::MessageType type, void* data)
 {
-
-}
-void Main::OnInput(Service::InputMessageType type, const Service::InputMessageData& data)
-{
-	if(data.Window != m_MainWindow)
-	{
-		return;
-	}
-
 	switch(type)
 	{
-	#if 0
-		case Koala::Editor::Service::InputMessageType::KeyPress:
+		case Service::MessageType::NewProject:
 		{
-			if(data.Key == Tool::KeyType::Escape)
-			{
-				m_MainWindow.Destroy();
-			}
+			m_ProjectName.clear();
+			break;
 		}
-	#endif
+		case Service::MessageType::SaveProject:
+		case Service::MessageType::LoadProject:
+		{
+			auto saveData = static_cast<Service::SaveProjectData*>(data);
+
+			m_ProjectName = saveData->ProjectName;
+			break;
+		}
 	}
 }
+void Main::OnInput(Service::InputMessageType type, const Service::InputMessageData& data)
+{ }
 
 Main::~Main() noexcept
 {

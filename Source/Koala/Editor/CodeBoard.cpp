@@ -5,6 +5,8 @@
 
 namespace Koala::Editor {
 
+static const Gfx::Vector2 FunctionStartPosition = Gfx::Vector2(0.05f, 0.1f);
+
 CodeBoard::CodeBoard(const Tool::Window& window) :
 	Gfx::Panel(window, 
 			   Gfx::Vector2(CodeBoardStartPosition().GetX(), 
@@ -16,20 +18,13 @@ CodeBoard::CodeBoard(const Tool::Window& window) :
 	Panel::DisableScrollBar();
 	Panel::DisablePanelInput();
 
-	m_FunctionList.emplace_back();
-	m_FunctionList.back().SceneNodes.emplace_back();
-	{
-		auto& programFunctionInfo = Utility::Core::FunctionManager::GetDefault(Utility::Text::Program);
-
-		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionInfo.ID);
-		m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.05f, 0.1f);
-	}
+	Initialize();
 
 	// Test user functions
-#if 0
+#if 1
 	m_FunctionList.emplace_back();
 	m_FunctionList.back().SceneNodes.emplace_back();
-	m_FunctionList.back().SceneNodes.back().Position = Gfx::Vector2(0.7f, 0.3f);
+	m_FunctionList.back().SceneNodes.back().Position = FunctionStartPosition;
 	{
 		Utility::Core::FunctionInfo functionInfo;
 		functionInfo.Name = "Test";
@@ -40,8 +35,6 @@ CodeBoard::CodeBoard(const Tool::Window& window) :
 		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionID);
 	}
 #endif
-
-	m_SelectedFunction = 0;
 }
 
 void CodeBoard::OnGui()
@@ -92,6 +85,29 @@ void CodeBoard::OnMessage(Service::MessageType type, void* data)
 
 	switch(type)
 	{
+		case Service::MessageType::NewProject:
+		{
+			Initialize();
+			break;
+		}
+		case Service::MessageType::SaveProject:
+		{
+			auto saveData = static_cast<Service::SaveProjectData*>(data);
+
+			saveData->Functions = m_FunctionList;
+			saveData->SelectedFunction = m_SelectedFunction;
+
+			break;
+		}
+		case Service::MessageType::LoadProject:
+		{
+			auto loadData = static_cast<Service::LoadProjectData*>(data);
+
+			m_FunctionList = loadData->Functions;
+			m_SelectedFunction = loadData->SelectedFunction;
+
+			break;
+		}
 		case Service::MessageType::NodeMove:
 		{
 			if(m_IsConnecting)
@@ -298,7 +314,23 @@ void CodeBoard::OnInput(Service::InputMessageType type, const Service::InputMess
 	}
 }
 
-CodeBoard::SceneNode& CodeBoard::GetSceneNode(Utility::Core::NodeID nodeID)
+void CodeBoard::Initialize()
+{
+	m_FunctionList.clear();
+
+	m_FunctionList.emplace_back();
+	m_FunctionList.back().SceneNodes.emplace_back();
+	{
+		auto& programFunctionInfo = Utility::Core::FunctionManager::GetDefault(Utility::Text::Program);
+
+		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionInfo.ID);
+		m_FunctionList.back().SceneNodes.back().Position = FunctionStartPosition;
+	}
+
+	m_SelectedFunction = 0;
+}
+
+SceneNode& CodeBoard::GetSceneNode(Utility::Core::NodeID nodeID)
 {
 	for( auto& sceneNode : m_FunctionList[m_SelectedFunction].SceneNodes )
 	{

@@ -4,7 +4,11 @@
 #include <Koala/Editor/Gfx/Vector2.h>
 #include <Koala/Utility/Macro.h>
 #include <string>
+#include <vector>
 
+namespace Koala::Editor {
+struct Function;
+}
 namespace Koala::Editor::Tool {
 class Window;
 enum class KeyType;
@@ -47,6 +51,10 @@ struct InputMessageData
 
 #define MESSAGE_TYPES(value, assignment) \
 	value(ProgramExit) \
+	value(NewProject) \
+	value(SaveProject) \
+	value(LoadProject) \
+	\
 	value(LogInfo) \
 	value(LogError) \
 	\
@@ -58,9 +66,18 @@ struct InputMessageData
 	value(ConnectionRemove) \
 	\
 	value(RequestNode) \
-	value(SpawnNode)
+	value(SpawnNode) \
 
 DECLARE_ENUM(MessageType, MESSAGE_TYPES)
+
+struct SaveProjectData
+{
+	std::string ProjectName;
+
+	std::vector<Function> Functions;
+	size_t SelectedFunction;
+};
+using LoadProjectData = SaveProjectData;
 
 struct LogMessageData
 {

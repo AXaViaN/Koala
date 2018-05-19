@@ -178,6 +178,23 @@ Vector2 Renderer::GetCursorPosition()
 	return pos;
 }
 
+void Renderer::OpenPopup(const std::string& title)
+{
+	ImGui::OpenPopup(title.c_str());
+}
+void Renderer::ClosePopup()
+{
+	ImGui::CloseCurrentPopup();
+}
+bool Renderer::BeginPopup(const std::string& title)
+{
+	return ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+}
+void Renderer::EndPopup()
+{
+	ImGui::EndPopup();
+}
+
 bool Renderer::DrawText(const std::string& str)
 {
 	ImVec2 textRectMin = ImGui::GetWindowPos() + ImGui::GetCursorPos();
@@ -198,6 +215,16 @@ bool Renderer::DrawText(const std::string& str)
 bool Renderer::DrawText(Utility::Text text)
 {
 	return DrawText(Utility::Resource::GetText(text));
+}
+bool Renderer::DrawButton(const std::string& str, float height, bool highlight)
+{
+	float width = (height * ImGui::GetWindowSize().y) / ImGui::GetWindowSize().x;
+	return DrawButton(str, Vector2(width, height), highlight);
+}
+bool Renderer::DrawButton(Utility::Text text, float height, bool highlight)
+{
+	float width = (height * ImGui::GetWindowSize().y) / ImGui::GetWindowSize().x;
+	return DrawButton(text, Vector2(width, height), highlight);
 }
 bool Renderer::DrawButton(const std::string& str, const Vector2& size, bool highlight)
 {

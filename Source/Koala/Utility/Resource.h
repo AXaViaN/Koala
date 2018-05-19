@@ -96,6 +96,13 @@ enum class Text
 	Start,
 	End,
 	Index,
+
+	KoalaEditor,
+	NewProject,
+	Save,
+	Open,
+	Cancel,
+	FileName,
 };
 
 enum class Icon

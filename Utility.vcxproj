@@ -31,6 +31,7 @@
     <ClInclude Include="Source\Koala\Utility\Macro.h" />
     <ClInclude Include="Source\Koala\Utility\Platform.h" />
     <ClInclude Include="Source\Koala\Utility\Resource.h" />
+    <ClInclude Include="Source\Koala\Utility\Serialization.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Koala\Utility\Clock.cpp" />
@@ -40,6 +41,7 @@
     <ClCompile Include="Source\Koala\Utility\File.cpp" />
     <ClCompile Include="Source\Koala\Utility\Logger.cpp" />
     <ClCompile Include="Source\Koala\Utility\Resource.cpp" />
+    <ClCompile Include="Source\Koala\Utility\Serialization.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

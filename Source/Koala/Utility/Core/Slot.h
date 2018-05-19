@@ -4,6 +4,10 @@
 #include <Koala/Utility/Core/Variable.h>
 #include <vector>
 
+namespace Koala::Utility {
+class Serialization;
+}
+
 namespace Koala::Utility::Core {
 
 using NodeID = size_t;
@@ -16,6 +20,7 @@ struct Port
 
 class Slot
 {
+	friend class Serialization;
 public:
 	Slot(NodeID nodeID, size_t slotIndex, Variable variableTemplate) : 
 		m_Port({nodeID, slotIndex}),

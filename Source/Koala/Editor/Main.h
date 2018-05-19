@@ -25,6 +25,7 @@ public: // Rule of five
 
 private:
 	Tool::Window m_MainWindow;
+	std::string m_ProjectName;
 
 	bool m_CanRun = false;
 

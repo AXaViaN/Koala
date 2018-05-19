@@ -98,6 +98,13 @@ Resource::Resource()
 	m_TextMap[Text::Start] = u8"Basla";
 	m_TextMap[Text::End] = u8"Bitir";
 	m_TextMap[Text::Index] = u8"Indeks";
+
+	m_TextMap[Text::KoalaEditor] = u8"Koala Editor";
+	m_TextMap[Text::NewProject] = u8"Yeni Proje";
+	m_TextMap[Text::Save] = u8"Kaydet";
+	m_TextMap[Text::Open] = u8"Ac";
+	m_TextMap[Text::Cancel] = u8"Vazgec";
+	m_TextMap[Text::FileName] = u8"Dosya Adi";
 }
 Resource::~Resource() noexcept
 {

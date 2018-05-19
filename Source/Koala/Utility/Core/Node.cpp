@@ -86,4 +86,15 @@ std::vector<Slot>& Node::GetSlots(SlotSide slotSide)
 	}
 }
 
+NodeID Node::PeekNextID()
+{
+	NodeID nextID = g_IDGenerator.GetNextID();
+	g_IDGenerator.SetNextID(nextID);
+	return nextID;
+}
+void Node::SetNextID(NodeID id)
+{
+	g_IDGenerator.SetNextID(id);
+}
+
 } // namespace Koala::Utility::Core

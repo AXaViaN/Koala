@@ -8,14 +8,15 @@
 
 namespace Koala::Editor {
 
+struct SceneNode;
+struct Function;
+
 class CodeBoard final : public Gfx::Panel
 {
 public:
 	CodeBoard(const Tool::Window& window);
 
 private:
-	struct SceneNode;
-	struct Function;
 	struct ConnectionData
 	{
 		Utility::Core::Node* Node;
@@ -27,6 +28,8 @@ private:
 	virtual void OnGui() override;
 	virtual void OnMessage(Service::MessageType type, void* data) override;
 	virtual void OnInput(Service::InputMessageType type, const Service::InputMessageData& data) override;
+
+	void Initialize();
 
 	SceneNode& GetSceneNode(Utility::Core::NodeID nodeID);
 	void RemoveConnections(Utility::Core::Slot& slot, Utility::Core::SlotSide slotSide);
@@ -43,12 +46,12 @@ private:
 
 };
 
-struct CodeBoard::SceneNode
+struct SceneNode
 {
 	Utility::Core::Node Node = Utility::Core::Node(0);
 	Gfx::Vector2 Position;
 };
-struct CodeBoard::Function
+struct Function
 {
 	std::vector<SceneNode> SceneNodes;
 	size_t CoreNodeCount = 1;

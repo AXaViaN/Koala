@@ -5,6 +5,10 @@
 #include <Koala/Utility/Core/Slot.h>
 #include <vector>
 
+namespace Koala::Utility {
+class Serialization;
+}
+
 namespace Koala::Utility::Core {
 
 using NodeID = size_t;
@@ -17,6 +21,7 @@ enum class SlotSide
 
 class Node
 {
+	friend class Serialization;
 public:
 	Node(FunctionID functionID);
 
@@ -34,6 +39,11 @@ public:
 	{
 		return m_ID;
 	}
+
+	// Serialization Helpers
+private:
+	static NodeID PeekNextID();
+	static void SetNextID(NodeID id);
 
 private:
 	NodeID m_ID = 0;

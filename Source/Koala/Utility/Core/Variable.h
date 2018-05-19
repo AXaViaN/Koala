@@ -4,12 +4,17 @@
 #include <Koala/Utility/Resource.h>
 #include <string>
 
+namespace Koala::Utility {
+class Serialization;
+}
+
 namespace Koala::Utility::Core {
 
 enum class VariableType;
 
 class Variable
 {
+	friend class Serialization;
 public:
 	Variable(const std::string& name, VariableType type) : 
 		m_Name(name),

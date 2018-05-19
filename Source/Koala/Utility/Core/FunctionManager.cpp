@@ -3,6 +3,8 @@
 
 namespace Koala::Utility::Core {
 
+static constexpr size_t UserFunctionIDStart = 0x80000000;
+
 static std::vector<FunctionInfo>& GetFunctionTemplates()
 {
 	static std::vector<FunctionInfo> functionTemplates;
@@ -23,7 +25,7 @@ static char g_DummyInitializer = SetupDefaultFunctions();
 FunctionID FunctionManager::Add(const FunctionInfo& functionInfo)
 {
 	GetFunctionTemplates().emplace_back(functionInfo);
-
+	
 	auto& function = GetFunctionTemplates().back();
 	function.ID = GetIDGenerator().GetNextID();
 	if(function.NameText != Text::Empty)
@@ -42,6 +44,16 @@ bool FunctionManager::Remove(FunctionID id)
 		return true;
 	}
 	return false;
+}
+void FunctionManager::RemoveAllUserFunctions()
+{
+	auto lastID = GetIDGenerator().GetNextID()-1;
+	while(lastID >= UserFunctionIDStart)
+	{
+		Remove(lastID--);
+	}
+
+	GetIDGenerator().SetNextID(UserFunctionIDStart);
 }
 bool FunctionManager::Edit(FunctionID id, const FunctionInfo& functionInfo)
 {
@@ -78,6 +90,34 @@ const FunctionInfo& FunctionManager::GetDefault(Text name)
 
 	static FunctionInfo dummy;
 	return dummy;
+}
+
+std::vector<FunctionInfo> FunctionManager::GetUserFunctions()
+{
+	auto nextID = GetIDGenerator().GetNextID();
+	GetIDGenerator().SetNextID(nextID);
+
+	std::vector<FunctionInfo> userFunctions;
+	for( size_t i=UserFunctionIDStart ; i<nextID ; ++i )
+	{
+		auto& function = Get(i);
+		if(function.ID != 0)
+		{
+			userFunctions.emplace_back(function);
+		}
+	}
+
+	return userFunctions;
+}
+FunctionID FunctionManager::PeekNextID()
+{
+	FunctionID nextID = GetIDGenerator().GetNextID();
+	GetIDGenerator().SetNextID(nextID);
+	return nextID;
+}
+void FunctionManager::SetNextID(FunctionID id)
+{
+	GetIDGenerator().SetNextID(id);
 }
 
 static int GetTemplateIndex(FunctionID id)
@@ -301,7 +341,7 @@ static char SetupDefaultFunctions()
 	}
 
 	// First half is reserved for default functions
-	GetIDGenerator().SetNextID(static_cast<size_t>(0x80000000));
+	GetIDGenerator().SetNextID(UserFunctionIDStart);
 	return '\0';
 }
 

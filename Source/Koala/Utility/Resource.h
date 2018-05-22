@@ -6,7 +6,7 @@
 
 namespace Koala::Utility {
 
-enum class Text;
+enum class Text : unsigned int;
 enum class Icon;
 
 class Resource
@@ -43,7 +43,7 @@ private:
 
 };
 
-enum class Text
+enum class Text : unsigned int
 {
 	Empty,
 
@@ -103,6 +103,45 @@ enum class Text
 	Open,
 	Cancel,
 	FileName,
+
+	VM_DataSizeMismatchError = std::numeric_limits<unsigned int>::max()/2u + 1,
+	VM_KoaFile,
+	VM_CodeExecutionError,
+
+	VM_CouldNotBeFound,
+	VM_PressEnterToExit,
+
+	VM_DivideByZeroError,
+	VM_NumberRequiredError,
+	VM_SetLocalModeError,
+	VM_GetLocalModeError,
+	VM_DerefModeError,
+	VM_AssignrefModeError,
+	VM_GetConstModeError,
+	VM_AllocError,
+	VM_InvalidBytecodeError,
+	VM_StackError,
+	VM_StackFrameError,
+
+	VM_Push8StackOverflow,
+	VM_Push64iStackOverflow,
+	VM_Push64fStackOverflow,
+	VM_Pop8OnEmptyStack,
+	VM_Pop64iOnEmptyStack,
+	VM_Pop64fOnEmptyStack,
+	VM_Top8OnEmptyStack,
+	VM_Top64iOnEmptyStack,
+	VM_Top64fOnEmptyStack,
+
+	VM_PushFrameStackOverflow,
+	VM_ReserveStackOverflow,
+	VM_PopFrameOnFirstFrame,
+	VM_GetVariableRef8OutOfBound,
+	VM_GetVariableRef64iOutOfBound,
+	VM_GetVariableRef64fOutOfBound,
+	VM_GetConstant8OutOfBound,
+	VM_GetConstant64iOutOfBound,
+	VM_GetConstant64fOutOfBound,
 };
 
 enum class Icon

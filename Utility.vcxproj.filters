@@ -54,6 +54,9 @@
     <ClInclude Include="Source\Koala\Utility\Serialization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Koala\Utility\Instruction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Koala\Utility\File.cpp">

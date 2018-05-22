@@ -1,9 +1,14 @@
-#include <cstdio>
+#include <Koala/VirtualMachine/Tool/LogManager.h>
 
 int main()
 {
-	std::printf("asaf\n");
+	// Check machine requirements
+	if(sizeof(double) != 8u || 
+	   sizeof(double) != sizeof(long long))
+	{
+		ExitMessage(Koala::Utility::Text::VM_DataSizeMismatchError);
+		return 0;
+	}
 
-	std::getchar();
 	return 0;
 }

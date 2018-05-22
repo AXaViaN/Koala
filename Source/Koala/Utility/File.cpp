@@ -20,6 +20,11 @@ File::File(const std::string& path, FileType fileType, bool create) :
 	m_Path(path),
 	m_FileType(fileType)
 {
+	if(path == "")
+	{
+		return;
+	}
+
 	// Default mode for file I/O
 	std::string mode = "ab+";
 	if(m_FileType == FileType::Text)
@@ -145,6 +150,11 @@ std::string File::ReadLine()
 
 void File::MoveHead(int delta)
 {
+	if(m_Handle == nullptr)
+	{
+		return;
+	}
+
 	std::fseek(static_cast<std::FILE*>(m_Handle), delta, SEEK_CUR);
 
 	if(std::feof(static_cast<std::FILE*>(m_Handle)))
@@ -158,11 +168,21 @@ void File::MoveHead(int delta)
 }
 void File::MoveHeadToFront()
 {
+	if(m_Handle == nullptr)
+	{
+		return;
+	}
+
 	std::fseek(static_cast<std::FILE*>(m_Handle), 0, SEEK_SET);
 	m_IsEOF = false;
 }
 void File::MoveHeadToEnd()
 {
+	if(m_Handle == nullptr)
+	{
+		return;
+	}
+
 	std::fseek(static_cast<std::FILE*>(m_Handle), 0, SEEK_END);
 	m_IsEOF = true;
 }

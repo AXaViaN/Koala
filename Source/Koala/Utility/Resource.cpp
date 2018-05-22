@@ -106,44 +106,43 @@ Resource::Resource()
 	m_TextMap[Text::Cancel] = u8"Vazgec";
 	m_TextMap[Text::FileName] = u8"Dosya Adi";
 
-	m_TextMap[Text::VM_DataSizeMismatchError] = u8"koalaVM bu bilgisayarda calistirilamaz: veri boyutu uyusmazligi";
-	m_TextMap[Text::VM_KoaFile] = u8"koa dosyasi = ";
-	m_TextMap[Text::VM_CodeExecutionError] = u8"Kod calistirilmaya baslanilamadi!";
+	m_TextMap[Text::DataSizeMismatchError] = u8"koalaVM bu bilgisayarda calistirilamaz: veri boyutu uyusmazligi";
+	m_TextMap[Text::KoaFile] = u8"koa dosyasi";
+	m_TextMap[Text::FileCouldNotBeFound] = u8"Dosya bulunamadi!";
+	m_TextMap[Text::PressEnterToExit] = u8"Cikis icin enter'a bas";
+	m_TextMap[Text::CodeExecutionError] = u8"Kod calistirilmaya baslanilamadi!";
 
-	m_TextMap[Text::VM_CouldNotBeFound] = u8"Bulunamadi!";
-	m_TextMap[Text::VM_PressEnterToExit] = u8"Cikis icin enter'a bas";
+	m_TextMap[Text::DivideByZeroError] = u8"Hatali giris: Sifira bölünme!";
+	m_TextMap[Text::NumberRequiredError] = u8"Hatali giris: Numara bekleniyordu!";
+	m_TextMap[Text::SetLocalModeError] = u8"Hatali mod: \'setlocal\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";
+	m_TextMap[Text::GetLocalModeError] = u8"Hatali mod: \'getlocal\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";
+	m_TextMap[Text::DerefModeError] = u8"Hatali mod: \'deref\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";
+	m_TextMap[Text::AssignrefModeError] = u8"Hatali mod: \'assignref\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";
+	m_TextMap[Text::GetConstModeError] = u8"Hatali mod: \'getconst\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";
+	m_TextMap[Text::AllocError] = u8"Bellek ayirma hatasi: \'alloc\' %zu konumunda new operatoru basarisiz oldu! \"%zu\" boyutu fazla buyuk olabilir.";
+	m_TextMap[Text::InvalidBytecodeError] = u8"Hatali bytecode \"%x\", konum = %zu!";
+	m_TextMap[Text::StackError] = u8"Stack hatasi: %s! Konum = %zu";
+	m_TextMap[Text::StackFrameError] = u8"StackFrame hatasi: %s! Konum = %zu";
 
-	m_TextMap[Text::VM_DivideByZeroError] = u8"Hatali giris: Sifira bölünme!";
-	m_TextMap[Text::VM_NumberRequiredError] = u8"Hatali giris: Numara bekleniyordu!";
-	m_TextMap[Text::VM_SetLocalModeError] = u8"Hatali mod: \'setlocal\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";
-	m_TextMap[Text::VM_GetLocalModeError] = u8"Hatali mod: \'getlocal\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";
-	m_TextMap[Text::VM_DerefModeError] = u8"Hatali mod: \'deref\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";
-	m_TextMap[Text::VM_AssignrefModeError] = u8"Hatali mod: \'assignref\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";
-	m_TextMap[Text::VM_GetConstModeError] = u8"Hatali mod: \'getconst\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";
-	m_TextMap[Text::VM_AllocError] = u8"Bellek ayirma hatasi: \'alloc\' %zu konumunda new operatoru basarisiz oldu! \"%zu\" boyutu fazla buyuk olabilir.";
-	m_TextMap[Text::VM_InvalidBytecodeError] = u8"Hatali bytecode \"%x\", konum = %zu!";
-	m_TextMap[Text::VM_StackError] = u8"Stack hatasi: %s! Konum = %zu";
-	m_TextMap[Text::VM_StackFrameError] = u8"StackFrame hatasi: %s! Konum = %zu";
+	m_TextMap[Text::Push8StackOverflow] = u8"Push8() yigin tasmasina neden oldu";
+	m_TextMap[Text::Push64iStackOverflow] = u8"Push64i() yigin tasmasina neden oldu";
+	m_TextMap[Text::Push64fStackOverflow] = u8"Push64f() yigin tasmasina neden oldu";
+	m_TextMap[Text::Pop8OnEmptyStack] = u8"Pop8() cagirisi bos yiginda";
+	m_TextMap[Text::Pop64iOnEmptyStack] = u8"Pop64i() cagirisi bos yiginda";
+	m_TextMap[Text::Pop64fOnEmptyStack] = u8"Pop64f() cagirisi bos yiginda";
+	m_TextMap[Text::Top8OnEmptyStack] = u8"Top8() cagirisi bos yiginda";
+	m_TextMap[Text::Top64iOnEmptyStack] = u8"Top64i() cagirisi bos yiginda";
+	m_TextMap[Text::Top64fOnEmptyStack] = u8"Top64f() cagirisi bos yiginda";
 
-	m_TextMap[Text::VM_Push8StackOverflow] = u8"Push8() yigin tasmasina neden oldu";
-	m_TextMap[Text::VM_Push64iStackOverflow] = u8"Push64i() yigin tasmasina neden oldu";
-	m_TextMap[Text::VM_Push64fStackOverflow] = u8"Push64f() yigin tasmasina neden oldu";
-	m_TextMap[Text::VM_Pop8OnEmptyStack] = u8"Pop8() cagirisi bos yiginda";
-	m_TextMap[Text::VM_Pop64iOnEmptyStack] = u8"Pop64i() cagirisi bos yiginda";
-	m_TextMap[Text::VM_Pop64fOnEmptyStack] = u8"Pop64f() cagirisi bos yiginda";
-	m_TextMap[Text::VM_Top8OnEmptyStack] = u8"Top8() cagirisi bos yiginda";
-	m_TextMap[Text::VM_Top64iOnEmptyStack] = u8"Top64i() cagirisi bos yiginda";
-	m_TextMap[Text::VM_Top64fOnEmptyStack] = u8"Top64f() cagirisi bos yiginda";
-
-	m_TextMap[Text::VM_PushFrameStackOverflow] = u8"PushFrame() yigin tasmasina neden oldu";
-	m_TextMap[Text::VM_ReserveStackOverflow] = u8"Reserve() yigin tasmasina neden oldu";
-	m_TextMap[Text::VM_PopFrameOnFirstFrame] = u8"PopFrame() cagirisi ilk cercevede";
-	m_TextMap[Text::VM_GetVariableRef8OutOfBound] = u8"GetVariableRef8() yigin disina ulasmaya calisiyor";
-	m_TextMap[Text::VM_GetVariableRef64iOutOfBound] = u8"GetVariableRef64i() yigin disina ulasmaya calisiyor";
-	m_TextMap[Text::VM_GetVariableRef64fOutOfBound] = u8"GetVariableRef64f() yigin disina ulasmaya calisiyor";
-	m_TextMap[Text::VM_GetConstant8OutOfBound] = u8"GetConstant8() yigin disina ulasmaya calisiyor";
-	m_TextMap[Text::VM_GetConstant64iOutOfBound] = u8"GetConstant64i() yigin disina ulasmaya calisiyor";
-	m_TextMap[Text::VM_GetConstant64fOutOfBound] = u8"GetConstant64f() yigin disina ulasmaya calisiyor";
+	m_TextMap[Text::PushFrameStackOverflow] = u8"PushFrame() yigin tasmasina neden oldu";
+	m_TextMap[Text::ReserveStackOverflow] = u8"Reserve() yigin tasmasina neden oldu";
+	m_TextMap[Text::PopFrameOnFirstFrame] = u8"PopFrame() cagirisi ilk cercevede";
+	m_TextMap[Text::GetVariableRef8OutOfBound] = u8"GetVariableRef8() yigin disina ulasmaya calisiyor";
+	m_TextMap[Text::GetVariableRef64iOutOfBound] = u8"GetVariableRef64i() yigin disina ulasmaya calisiyor";
+	m_TextMap[Text::GetVariableRef64fOutOfBound] = u8"GetVariableRef64f() yigin disina ulasmaya calisiyor";
+	m_TextMap[Text::GetConstant8OutOfBound] = u8"GetConstant8() yigin disina ulasmaya calisiyor";
+	m_TextMap[Text::GetConstant64iOutOfBound] = u8"GetConstant64i() yigin disina ulasmaya calisiyor";
+	m_TextMap[Text::GetConstant64fOutOfBound] = u8"GetConstant64f() yigin disina ulasmaya calisiyor";
 }
 Resource::~Resource() noexcept
 {

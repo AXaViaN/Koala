@@ -20,7 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Koala\VirtualMachine\Application.cpp" />
+    <ClCompile Include="Source\Koala\VirtualMachine\Interpreter.cpp" />
     <ClCompile Include="Source\Koala\VirtualMachine\Tool\LogManager.cpp" />
+    <ClCompile Include="Source\Koala\VirtualMachine\Tool\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Utility.vcxproj">
@@ -28,7 +30,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Koala\VirtualMachine\Interpreter.h" />
     <ClInclude Include="Source\Koala\VirtualMachine\Tool\LogManager.h" />
+    <ClInclude Include="Source\Koala\VirtualMachine\Tool\Util.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -7,6 +7,9 @@
 
 namespace Koala::Utility {
 
+static const std::string KoalaBinaryMark = "KOA";
+static const std::string KoalaProjectMark = "KPJ";
+
 class Serialization
 {
 public:

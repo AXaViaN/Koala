@@ -18,24 +18,18 @@
     <ClCompile Include="Source\Koala\VirtualMachine\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Koala\VirtualMachine\Tool\LogManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Koala\VirtualMachine\Tool\Util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Koala\VirtualMachine\Interpreter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Koala\VirtualMachine\Tool\LogManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Koala\VirtualMachine\Tool\Util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Koala\VirtualMachine\Interpreter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Koala\VirtualMachine\Tool\Stack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Koala\VirtualMachine\Tool\StackFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

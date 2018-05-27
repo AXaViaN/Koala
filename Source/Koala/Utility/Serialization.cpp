@@ -3,7 +3,6 @@
 
 namespace Koala::Utility {
 
-static const std::string KoalaProjectMark = "KOA";
 static const Core::SlotSide SlotSides[] = {Core::SlotSide::Back, Core::SlotSide::Front};
 static const Core::Variable DummyVariable = Core::Variable("", Core::VariableType::None);
 

@@ -25,6 +25,8 @@
     <ClInclude Include="Source\Koala\Utility\Core\Slot.h" />
     <ClInclude Include="Source\Koala\Utility\Core\Variable.h" />
     <ClInclude Include="Source\Koala\Utility\Date.h" />
+    <ClInclude Include="Source\Koala\Utility\Extra\LogManager.h" />
+    <ClInclude Include="Source\Koala\Utility\Extra\Util.h" />
     <ClInclude Include="Source\Koala\Utility\File.h" />
     <ClInclude Include="Source\Koala\Utility\IDGenerator.h" />
     <ClInclude Include="Source\Koala\Utility\Instruction.h" />
@@ -39,6 +41,8 @@
     <ClCompile Include="Source\Koala\Utility\Core\FunctionManager.cpp" />
     <ClCompile Include="Source\Koala\Utility\Core\Node.cpp" />
     <ClCompile Include="Source\Koala\Utility\Date.cpp" />
+    <ClCompile Include="Source\Koala\Utility\Extra\LogManager.cpp" />
+    <ClCompile Include="Source\Koala\Utility\Extra\Util.cpp" />
     <ClCompile Include="Source\Koala\Utility\File.cpp" />
     <ClCompile Include="Source\Koala\Utility\Logger.cpp" />
     <ClCompile Include="Source\Koala\Utility\Resource.cpp" />

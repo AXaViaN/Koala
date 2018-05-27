@@ -1,5 +1,5 @@
-#ifndef KOALA__VIRTUAL_MACHINE__TOOL__LOG_MANAGER
-#define KOALA__VIRTUAL_MACHINE__TOOL__LOG_MANAGER
+#ifndef KOALA__UTILITY__EXTRA__LOG_MANAGER
+#define KOALA__UTILITY__EXTRA__LOG_MANAGER
 
 #include <Koala/Utility/Resource.h>
 #include <string>
@@ -14,18 +14,20 @@
 		std::sprintf(&message[0], formatForArg.c_str(), __VA_ARGS__); \
 		message.erase(message.find_first_of('\0')); \
 		\
-		Koala::VirtualMachine::Tool::LogManager::Log(__FUNCTION__, size_t(__LINE__), message); \
+		Koala::Utility::Extra::LogManager::Log(__FUNCTION__, size_t(__LINE__), message); \
 	}
 
-namespace Koala::VirtualMachine::Tool {
+namespace Koala::Utility::Extra {
 
 class LogManager
 {
 public:
+	static void Initialize(const std::string& projectName);
+
 	static void Log(const std::string& function, size_t line, const std::string& message);
 
 };
 
-} // namespace Koala::VirtualMachine::Tool
+} // namespace Koala::Utility::Extra
 
-#endif // KOALA__VIRTUAL_MACHINE__TOOL__LOG_MANAGER
+#endif // KOALA__UTILITY__EXTRA__LOG_MANAGER

@@ -1,12 +1,15 @@
 #include <Koala/VirtualMachine/Interpreter.h>
-#include <Koala/VirtualMachine/Tool/LogManager.h>
-#include <Koala/VirtualMachine/Tool/Util.h>
 #include <Koala/Utility/File.h>
+#include <Koala/Utility/Serialization.h>
+#include <Koala/Utility/Extra/LogManager.h>
+#include <Koala/Utility/Extra/Util.h>
 
 static const std::string GetCode(const std::string& filePath);
 
 int main(int argc, char* argv[])
 {
+	Koala::Utility::Extra::LogManager::Initialize("Koala VirtualMachine");
+
 	// Check machine requirements
 	if(sizeof(double) != 8u || 
 	   sizeof(double) != sizeof(long long))
@@ -26,7 +29,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		std::printf("%s = ", Koala::Utility::Resource::GetText(Koala::Utility::Text::KoaFile).c_str());
-		std::string filePath = Koala::VirtualMachine::Tool::Util::ReadLine();
+		std::string filePath = Koala::Utility::Extra::Util::ReadLine();
 		std::printf("\n-------------------------\n\n");
 
 		code = GetCode(filePath);
@@ -53,6 +56,12 @@ static const std::string GetCode(const std::string& filePath)
 		return "";
 	}
 	codeFile.MoveHeadToFront();
+
+	// Check if the file contains binary mark
+	if(codeFile.Read(Koala::Utility::KoalaBinaryMark.size()) != Koala::Utility::KoalaBinaryMark)
+	{
+		return "";
+	}
 
 	// Read the code
 	std::string code;

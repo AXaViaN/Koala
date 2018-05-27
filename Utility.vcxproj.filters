@@ -57,6 +57,12 @@
     <ClInclude Include="Source\Koala\Utility\Instruction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Koala\Utility\Extra\Util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Koala\Utility\Extra\LogManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Koala\Utility\File.cpp">
@@ -81,6 +87,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Koala\Utility\Serialization.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Koala\Utility\Extra\LogManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Koala\Utility\Extra\Util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

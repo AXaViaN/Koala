@@ -1,6 +1,7 @@
 #include <Koala/Utility/File.h>
 #include <Koala/Utility/Logger.h>
 #include <Koala/Utility/Platform.h>
+#include <Koala/Utility/Extra/Util.h>
 #include <algorithm>
 #include <cstdio>
 
@@ -10,8 +11,6 @@
 
 namespace Koala::Utility {
 
-// Helpers
-static void FixEndianness(void* value, size_t size);
 // Platform specific folder functions
 static bool DoesFolderExists(const std::string& path);
 static void CreateFolder(const std::string& path);
@@ -273,7 +272,7 @@ void File::WriteBinaryNumber(const void* value, size_t size)
 	{
 		static_cast<char*>(fixedValue)[i] = static_cast<const char*>(value)[i];
 	}
-	FixEndianness(fixedValue, size);
+	Extra::Util::FixEndianness(fixedValue, size);
 
 	std::fwrite(fixedValue, size, 1u, static_cast<std::FILE*>(m_Handle));
 }
@@ -290,44 +289,7 @@ void File::ReadBinaryNumber(void* value, size_t size)
 		m_IsEOF = true;
 	}
 
-	FixEndianness(value, size);
-}
-
-static void FixEndianness(void* value, size_t size)
-{
-	// Machine byte order flag. Check with a lambda function and save on static const
-	static const bool IsLittleEndianMachine = ([]() -> bool 
-	{
-		int x = 1;
-
-		// If the machine is little-endian, the least important bit
-		// will be on lower address. Little-endian will set the x=1
-		// as 01000000, big-endian 00000001. So casting to char will
-		// result in '1' for little-endian and '0' for big-endian.
-		if(*((char*)&x) == 1)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	})();
-
-	if(IsLittleEndianMachine)
-	{
-		return;
-	}
-
-	size_t i = 0;
-	size_t j = size - 1u;
-	while(i < j)
-	{
-		std::swap(static_cast<char*>(value)[i], static_cast<char*>(value)[j]);
-
-		++i;
-		--j;
-	}
+	Extra::Util::FixEndianness(value, size);
 }
 
 static bool DoesFolderExists(const std::string& path)

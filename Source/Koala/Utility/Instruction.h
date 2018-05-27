@@ -22,11 +22,9 @@ enum class Instruction : unsigned char
 	// Math
 	add8 = 0x30,
 	add64,
-	addi8,
 	addi64,
 	sub8,
 	sub64,
-	subi8,
 	subi64,
 	mul,
 	div,

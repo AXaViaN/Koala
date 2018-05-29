@@ -109,7 +109,7 @@ enum class Text : unsigned int
 	KoaFile,
 	FileCouldNotBeFound,
 	PressEnterToExit,
-	CodeExecutionError,
+	InvalidCodeFileError,
 
 	DivideByZeroError,
 	NumberRequiredError,
@@ -119,6 +119,8 @@ enum class Text : unsigned int
 	AssignrefModeError,
 	GetConstModeError,
 	AllocError,
+	S2IConversionError,
+	S2DConversionError,
 	InvalidBytecodeError,
 	StackError,
 	StackFrameError,

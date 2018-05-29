@@ -110,7 +110,7 @@ Resource::Resource()
 	m_TextMap[Text::KoaFile] = u8"koa dosyasi";
 	m_TextMap[Text::FileCouldNotBeFound] = u8"Dosya bulunamadi!";
 	m_TextMap[Text::PressEnterToExit] = u8"Cikis icin enter'a bas";
-	m_TextMap[Text::CodeExecutionError] = u8"Kod calistirilmaya baslanilamadi!";
+	m_TextMap[Text::InvalidCodeFileError] = u8"Kod dosyasi hatali!";
 
 	m_TextMap[Text::DivideByZeroError] = u8"Hatali giris: Sifira bölünme!";
 	m_TextMap[Text::NumberRequiredError] = u8"Hatali giris: Numara bekleniyordu!";
@@ -120,10 +120,12 @@ Resource::Resource()
 	m_TextMap[Text::AssignrefModeError] = u8"Hatali mod: \'assignref\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";
 	m_TextMap[Text::GetConstModeError] = u8"Hatali mod: \'getconst\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";
 	m_TextMap[Text::AllocError] = u8"Bellek ayirma hatasi: \'alloc\' %zu konumunda new operatoru basarisiz oldu! \"%zu\" boyutu fazla buyuk olabilir.";
+	m_TextMap[Text::S2IConversionError] = u8"Dönüsüm hatasi: %zu konumunda yazi-indeks dönüsümü basarisiz oldu!";
+	m_TextMap[Text::S2DConversionError] = u8"Dönüsüm hatasi: %zu konumunda yazi-sayi dönüsümü basarisiz oldu!";
 	m_TextMap[Text::InvalidBytecodeError] = u8"Hatali bytecode \"%x\", konum = %zu!";
 	m_TextMap[Text::StackError] = u8"Stack hatasi: %s! Konum = %zu";
 	m_TextMap[Text::StackFrameError] = u8"StackFrame hatasi: %s! Konum = %zu";
-
+	
 	m_TextMap[Text::Push8StackOverflow] = u8"Push8() yigin tasmasina neden oldu";
 	m_TextMap[Text::Push64iStackOverflow] = u8"Push64i() yigin tasmasina neden oldu";
 	m_TextMap[Text::Push64fStackOverflow] = u8"Push64f() yigin tasmasina neden oldu";

@@ -22,10 +22,10 @@ enum class Instruction : unsigned char
 	// Math
 	add8 = 0x30,
 	add64,
-	addi64,
+	add64i,
 	sub8,
 	sub64,
-	subi64,
+	sub64i,
 	mul,
 	div,
 	mod,
@@ -65,11 +65,11 @@ enum class Instruction : unsigned char
 	// Logic
 	equal8 = 0xB0,
 	equal64,
+	greater8,
+	greater64,
 	and,
 	or,
 	not,
-	greater8,
-	greater64,
 
 	// Branch
 	jmp = 0xD0,

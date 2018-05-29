@@ -60,6 +60,7 @@ static const std::string GetCode(const std::string& filePath)
 	// Check if the file contains binary mark
 	if(codeFile.Read(Koala::Utility::KoalaBinaryMark.size()) != Koala::Utility::KoalaBinaryMark)
 	{
+		ExitMessage(Koala::Utility::Text::InvalidCodeFileError);
 		return "";
 	}
 

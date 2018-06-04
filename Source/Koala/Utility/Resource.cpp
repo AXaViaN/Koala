@@ -150,7 +150,7 @@ Resource::~Resource() noexcept
 {
 	for( auto& icon : m_IconMap )
 	{
-		unsigned int textureID = reinterpret_cast<unsigned int>(icon.second);
+		auto textureID = reinterpret_cast<unsigned int>(icon.second);
 		if(textureID)
 		{
 			glDeleteTextures(1, &textureID);

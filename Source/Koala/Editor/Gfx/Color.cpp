@@ -14,23 +14,19 @@ Color::Color(float red, float green, float blue, float alpha)
 
 void Color::SetRed(float value)
 {
-	std::clamp(value, 0.0f, 1.0f);
-	m_RGBA[0] = value;
+	m_RGBA[0] = std::clamp(value, 0.0f, 1.0f);
 }
 void Color::SetGreen(float value)
 {
-	std::clamp(value, 0.0f, 1.0f);
-	m_RGBA[1] = value;
+	m_RGBA[1] = std::clamp(value, 0.0f, 1.0f);
 }
 void Color::SetBlue(float value)
 {
-	std::clamp(value, 0.0f, 1.0f);
-	m_RGBA[2] = value;
+	m_RGBA[2] = std::clamp(value, 0.0f, 1.0f);
 }
 void Color::SetAlpha(float value)
 {
-	std::clamp(value, 0.0f, 1.0f);
-	m_RGBA[3] = value;
+	m_RGBA[3] = std::clamp(value, 0.0f, 1.0f);
 }
 float Color::GetRed() const
 {
@@ -56,12 +52,12 @@ void Color::Clamp(float range0, float range1)
 	{
 		std::swap(range0, range1);
 	}
-	std::clamp(range0, 0.0f, 1.0f);
-	std::clamp(range1, 0.0f, 1.0f);
+	range0 = std::clamp(range0, 0.0f, 1.0f);
+	range1 = std::clamp(range1, 0.0f, 1.0f);
 
 	for( auto& color : m_RGBA )
 	{
-		std::clamp(color, range0, range1);
+		color = std::clamp(color, range0, range1);
 	}
 }
 

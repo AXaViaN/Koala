@@ -2,4 +2,6 @@
 /Bin
 /Doc/build
 
+*.log
+
 !*.lib

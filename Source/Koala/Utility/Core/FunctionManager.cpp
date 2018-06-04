@@ -16,8 +16,8 @@ static IDGenerator& GetIDGenerator()
 	return idGenerator;
 }
 
-static constexpr int IndexNotFound = -1;
-static int GetTemplateIndex(FunctionID id);
+static constexpr size_t IndexNotFound = -1;
+static size_t GetTemplateIndex(FunctionID id);
 
 static char SetupDefaultFunctions();
 static char g_DummyInitializer = SetupDefaultFunctions();
@@ -120,13 +120,13 @@ void FunctionManager::SetNextID(FunctionID id)
 	GetIDGenerator().SetNextID(id);
 }
 
-static int GetTemplateIndex(FunctionID id)
+static size_t GetTemplateIndex(FunctionID id)
 {
 	// Start from estimated position
-	int i = id - 1;
+	size_t i = id - 1;
 	if(id > GetFunctionTemplates().size())
 	{
-		i = GetFunctionTemplates().size()-1;
+		i = GetFunctionTemplates().size() - 1u;
 	}
 
 	while(i >= 0)

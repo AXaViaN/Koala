@@ -20,11 +20,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Koala\Compiler\Application.cpp" />
+    <ClCompile Include="Source\Koala\Compiler\Builder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Utility.vcxproj">
       <Project>{54bc4b7a-c085-4715-939f-157894eea32c}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Koala\Compiler\Builder.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

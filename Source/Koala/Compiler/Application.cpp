@@ -1,9 +1,59 @@
-#include <cstdio>
+#include <Koala/Compiler/Builder.h>
+#include <Koala/Utility/Serialization.h>
+#include <Koala/Utility/Extra/LogManager.h>
+#include <Koala/Utility/Extra/Util.h>
 
-int main()
+static const std::vector<Koala::Utility::Serialization::Function> GetFunctions(const std::string& filePath);
+
+int main(int argc, char* argv[])
 {
-	std::printf("asaf\n");
+	Koala::Utility::Extra::LogManager::Initialize("Koala Compiler");
 
-	std::getchar();
+	// Check machine requirements
+	if(sizeof(double) != 8u || 
+	   sizeof(double) != sizeof(long long))
+	{
+		ExitMessage(Koala::Utility::Text::DataSizeMismatchError);
+		return 0;
+	}
+
+	// Load functions from project file
+	// Select file from argument list if provided
+	// Else ask from command line
+	std::vector<Koala::Utility::Serialization::Function> functions;
+	if(argc > 1)
+	{
+		functions = GetFunctions(argv[1]);
+	}
+	else
+	{
+		std::printf("%s = ", Koala::Utility::Resource::GetText(Koala::Utility::Text::KprojFile).c_str());
+		std::string filePath = Koala::Utility::Extra::Util::ReadLine();
+		std::printf("\n-------------------------\n\n");
+
+		functions = GetFunctions(filePath);
+	}
+
+	// Check if the data is valid
+	if(functions.size() == 0)
+	{
+		return 0;
+	}
+
+	// Init & run the builder
+	Koala::Compiler::Builder(functions).Run();
+
 	return 0;
+}
+
+static const std::vector<Koala::Utility::Serialization::Function> GetFunctions(const std::string& filePath)
+{
+	auto projectData = Koala::Utility::Serialization::LoadProject(filePath);
+	if(projectData.IsDataValid == false)
+	{
+		ExitMessage(Koala::Utility::Text::InvalidProjectFileError);
+		return {};
+	}
+
+	return projectData.Functions;
 }

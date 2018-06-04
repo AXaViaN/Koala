@@ -108,10 +108,12 @@ Resource::Resource()
 
 	m_TextMap[Text::DataSizeMismatchError] = u8"koalaVM bu bilgisayarda calistirilamaz: veri boyutu uyusmazligi";
 	m_TextMap[Text::KoaFile] = u8"koa dosyasi";
+	m_TextMap[Text::KprojFile] = u8"kproj dosyasi";
 	m_TextMap[Text::FileCouldNotBeFound] = u8"Dosya bulunamadi!";
 	m_TextMap[Text::PressEnterToExit] = u8"Cikis icin enter'a bas";
 	m_TextMap[Text::InvalidCodeFileError] = u8"Kod dosyasi hatali!";
-
+	m_TextMap[Text::InvalidProjectFileError] = u8"Proje dosyasi hatali!";
+	
 	m_TextMap[Text::DivideByZeroError] = u8"Hatali giris: Sifira bölünme!";
 	m_TextMap[Text::NumberRequiredError] = u8"Hatali giris: Numara bekleniyordu!";
 	m_TextMap[Text::SetLocalModeError] = u8"Hatali mod: \'setlocal\' %zu konumunda tip hatasi! \"%d\" modu gecerli degil!";

@@ -129,7 +129,7 @@ static size_t GetTemplateIndex(FunctionID id)
 		i = GetFunctionTemplates().size() - 1u;
 	}
 
-	while(i >= 0)
+	while((int)i >= 0)
 	{
 		if(GetFunctionTemplates()[i].ID == id)
 		{

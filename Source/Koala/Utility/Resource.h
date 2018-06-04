@@ -107,9 +107,11 @@ enum class Text : unsigned int
 	// Virtual Machine and Compiler texts
 	DataSizeMismatchError = std::numeric_limits<unsigned int>::max()/2u + 1,
 	KoaFile,
+	KprojFile,
 	FileCouldNotBeFound,
 	PressEnterToExit,
 	InvalidCodeFileError,
+	InvalidProjectFileError,
 
 	DivideByZeroError,
 	NumberRequiredError,

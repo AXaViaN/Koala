@@ -1,4 +1,5 @@
 #include <Koala/Compiler/Builder.h>
+#include <Koala/Utility/File.h>
 #include <Koala/Utility/Instruction.h>
 #include <Koala/Utility/Extra/Util.h>
 #include <algorithm>
@@ -20,9 +21,16 @@ Builder::Builder(const std::string& binaryPath, const std::vector<Koala::Utility
 
 void Builder::Run()
 {
+	struct FunctionLink
+	{
+		std::string FunctionName;
+		size_t LinkPosition = 0;
+	};
 	struct FunctionData
 	{
+		std::string Name;
 		std::string Code;
+		std::vector<FunctionLink> FunctionLinks;
 	};
 
 	// Code to write
@@ -35,6 +43,8 @@ void Builder::Run()
 		auto& functionData = functionDatas.emplace_back();
 
 		auto nodes = GetNodes(function);
+		functionData.Name = nodes[0].GetName();
+
 		auto& startNode = nodes.front();
 		auto& returnNode = nodes.back();
 		for( auto& node : nodes )
@@ -62,6 +72,7 @@ void Builder::Run()
 			// Return node only outputs the variables
 			if(&node == &returnNode)
 			{
+				functionData.Code += (unsigned char)Utility::Instruction::ret;
 				break;
 			}
 
@@ -74,6 +85,17 @@ void Builder::Run()
 				if(nodeTemplate.NameText == Utility::Text::Empty)
 				{
 					// Call user function
+					FunctionLink link;
+					link.FunctionName = nodeTemplate.Name;
+
+					functionData.Code += (unsigned char)Utility::Instruction::push64;
+
+					link.LinkPosition = functionData.Code.size();
+					functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(-1);
+
+					functionData.Code += (unsigned char)Utility::Instruction::call;
+
+					functionData.FunctionLinks.emplace_back(link);
 				}
 				else
 				{
@@ -89,10 +111,39 @@ void Builder::Run()
 		}
 	}
 
-	// Link functions
+	// Create code
+	std::string code;
+	std::map<std::string, size_t> functionPositions;
 
-	// Write to the code file
+	code += Utility::Extra::Util::GetBinaryNumber<long long>(constantBufferCode.size());
+	code += constantBufferCode;
+	for( auto& functionData : functionDatas )
+	{
+		functionPositions[functionData.Name] = code.size();
+		code += functionData.Code;
+	}
 	
+	// Link functions
+	for( auto& functionData : functionDatas )
+	{
+		size_t currentFunctionPosition = functionPositions[functionData.Name];
+		for( auto& link : functionData.FunctionLinks )
+		{
+			size_t linkedFunctionPosition = functionPositions[link.FunctionName];
+			auto value = Utility::Extra::Util::GetBinaryNumber<long long>(linkedFunctionPosition);
+
+			auto linkCodeBegin = code.begin() + currentFunctionPosition + link.LinkPosition;
+			code.replace(linkCodeBegin, linkCodeBegin+value.size(), value);
+		}
+	}
+
+	// Write code to the binary file
+	Utility::File binaryFile(m_BinaryPath);
+	if(binaryFile.IsValid())
+	{
+		binaryFile.DeleteContents();
+		binaryFile.Write(code);
+	}
 }
 
 static std::vector<Utility::Core::Node> GetNodes(Koala::Utility::Serialization::Function function)

@@ -35,6 +35,8 @@ void Builder::Run()
 		auto& functionData = functionDatas.emplace_back();
 
 		auto nodes = GetNodes(function);
+		auto& startNode = nodes.front();
+		auto& returnNode = nodes.back();
 		for( auto& node : nodes )
 		{
 			if(node.GetID() == 0)
@@ -57,9 +59,17 @@ void Builder::Run()
 				}
 			}
 
+			// Return node only outputs the variables
+			if(&node == &returnNode)
+			{
+				break;
+			}
+
 			// Produce instruction
 			auto& nodeTemplate = Utility::Core::FunctionManager::Get(node.GetFunctionID());
-			if(nodeTemplate.ID != 0)
+			// Start node doesn't have an instruction
+			if(&node != &startNode && 
+			   nodeTemplate.ID != 0)
 			{
 				if(nodeTemplate.NameText == Utility::Text::Empty)
 				{
@@ -89,26 +99,22 @@ static std::vector<Utility::Core::Node> GetNodes(Koala::Utility::Serialization::
 {
 	// Setup searching
 	Utility::Core::NodeID nextNodeID;
-	Utility::Core::NodeID endNodeID;
 	Utility::Core::SlotSide slotSide;
 	if(function.CoreNodeCount == 1)
 	{
 		nextNodeID = function.SceneNodes.at(0).Node.GetFrontSlots().at(0).GetConnections().at(0).NodeID;
-		endNodeID = 0;
 		slotSide = Utility::Core::SlotSide::Front;
 	}
 	else
 	{
 		nextNodeID = function.SceneNodes.at(1).Node.GetID();
-		endNodeID = function.SceneNodes.at(0).Node.GetID();
 		// If there is a return node, reverse search
 		slotSide = Utility::Core::SlotSide::Back;
 	}
 
 	// Search and fill
 	std::vector<Utility::Core::Node> nodes;
-	while(nextNodeID != endNodeID &&
-		  nextNodeID != 0)
+	while(nextNodeID != 0)
 	{
 		for( auto& sceneNode : function.SceneNodes )
 		{

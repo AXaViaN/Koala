@@ -37,6 +37,7 @@ public:
 	// Serialization Helpers
 private:
 	static std::vector<FunctionInfo> GetUserFunctions();
+	static FunctionID SerializeAdd(const FunctionInfo& functionInfo);
 	static FunctionID PeekNextID();
 	static void SetNextID(FunctionID id);
 

@@ -109,6 +109,18 @@ std::vector<FunctionInfo> FunctionManager::GetUserFunctions()
 
 	return userFunctions;
 }
+FunctionID FunctionManager::SerializeAdd(const FunctionInfo& functionInfo)
+{
+	GetFunctionTemplates().emplace_back(functionInfo);
+
+	auto& function = GetFunctionTemplates().back();
+	if(function.NameText != Text::Empty)
+	{
+		function.Name = Resource::GetText(function.NameText);
+	}
+
+	return function.ID;
+}
 FunctionID FunctionManager::PeekNextID()
 {
 	FunctionID nextID = GetIDGenerator().GetNextID();

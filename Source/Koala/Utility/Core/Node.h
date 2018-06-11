@@ -39,6 +39,10 @@ public:
 	{
 		return m_ID;
 	}
+	const FunctionID& GetFunctionID() const
+	{
+		return m_FunctionID;
+	}
 
 	// Serialization Helpers
 private:

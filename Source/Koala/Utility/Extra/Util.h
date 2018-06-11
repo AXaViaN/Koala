@@ -16,6 +16,12 @@ public:
 	}
 	static void FixEndianness(void* value, size_t size);
 
+	template<typename T> static std::string GetBinaryNumber(const T& value)
+	{
+		return GetBinaryNumber(&value, sizeof(T));
+	}
+	static std::string GetBinaryNumber(const void* value, size_t size);
+
 };
 
 } // namespace Koala::Utility::Extra

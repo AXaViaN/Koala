@@ -57,4 +57,22 @@ void Util::FixEndianness(void* value, size_t size)
 	}
 }
 
+std::string Util::GetBinaryNumber(const void* value, size_t size)
+{
+	// Fix endian
+	void* fixedValue = alloca(size);
+	for( size_t i=0 ; i<size ; ++i )
+	{
+		static_cast<char*>(fixedValue)[i] = static_cast<const char*>(value)[i];
+	}
+	Utility::Extra::Util::FixEndianness(fixedValue, size);
+
+	std::string numberAsStr;
+	for( size_t i=0 ; i<size ; ++i )
+	{
+		numberAsStr += static_cast<char*>(fixedValue)[i];
+	}
+	return numberAsStr;
+}
+
 } // namespace Koala::Utility::Extra

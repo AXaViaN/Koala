@@ -21,7 +21,7 @@ CodeBoard::CodeBoard(const Tool::Window& window) :
 	Initialize();
 
 	// Test user functions
-#if 1
+#if 0
 	m_FunctionList.emplace_back();
 	m_FunctionList.back().SceneNodes.emplace_back();
 	m_FunctionList.back().SceneNodes.back().Position = FunctionStartPosition;

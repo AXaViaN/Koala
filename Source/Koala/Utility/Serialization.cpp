@@ -226,6 +226,8 @@ Serialization::Data Serialization::LoadProject(const std::string& path)
 			auto& variable = userFunction.FrontSlots.emplace_back(DummyVariable);
 			variable = readVariable();
 		}
+
+		Core::FunctionManager::SerializeAdd(userFunction);
 	}
 
 	// Deserialize ID generators

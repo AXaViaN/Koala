@@ -16,6 +16,18 @@ struct Port
 {
 	NodeID NodeID = 0;
 	size_t SlotIndex = 0;
+
+public:
+	bool operator==(const Port& other) const
+	{
+		return NodeID == other.NodeID && 
+			   SlotIndex == other.SlotIndex;
+	}
+	bool operator!=(const Port& other) const
+	{
+		return !(*this == other);
+	}
+
 };
 
 class Slot
@@ -36,8 +48,7 @@ public:
 	{
 		for( size_t i=0 ; i<m_Connections.size() ; ++i )
 		{
-			if(m_Connections[i].NodeID == port.NodeID &&
-			   m_Connections[i].SlotIndex == port.SlotIndex)
+			if(m_Connections[i] == port)
 			{
 				m_Connections.erase(m_Connections.begin() + i);
 				break;
@@ -70,8 +81,7 @@ public:
 	{
 		for( auto& connection : m_Connections )
 		{
-			if(connection.NodeID == port.NodeID &&
-			   connection.SlotIndex == port.SlotIndex)
+			if(connection == port)
 			{
 				return connection;
 			}

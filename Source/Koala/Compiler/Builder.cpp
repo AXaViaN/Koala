@@ -27,11 +27,41 @@ void Builder::Run()
 		std::string FunctionName;
 		size_t LinkPosition = 0;
 	};
+	struct TemporaryVariable
+	{
+		Utility::Core::Port Port;
+		size_t Position = 0;
+		size_t Size = 0;
+		unsigned char Mode = 0; // mode0: char, mode1: double, mode2: long long, mode3: string
+	};
 	struct FunctionData
 	{
 		std::string Name;
 		std::string Code;
 		std::vector<FunctionLink> FunctionLinks;
+		std::vector<TemporaryVariable> TemporaryVariables;
+
+	public:
+		FunctionData()
+		{
+			// For convenience
+			TemporaryVariables.emplace_back();
+		}
+
+		TemporaryVariable& GetTemporaryVariable(const Utility::Core::Port& port)
+		{
+			for( auto& variable : TemporaryVariables )
+			{
+				if(variable.Port == port)
+				{
+					return variable;
+				}
+			}
+			
+			static TemporaryVariable dummy;
+			return dummy;
+		}
+
 	};
 
 	// Code to write
@@ -62,7 +92,13 @@ void Builder::Run()
 				
 				if(slot.IsConnected())
 				{
+					auto& variable = functionData.GetTemporaryVariable(slot.GetConnections().at(0));
 
+					functionData.Code += (unsigned char)Utility::Instruction::push64;
+					functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(variable.Position);
+					functionData.Code += (unsigned char)Utility::Instruction::push8;
+					functionData.Code += variable.Mode;
+					functionData.Code += (unsigned char)Utility::Instruction::getlocal;
 				}
 				else
 				{
@@ -108,7 +144,40 @@ void Builder::Run()
 			// Output
 			for( auto& slot : node.GetFrontSlots() )
 			{
+				size_t temporaryVariablePosition = functionData.TemporaryVariables.back().Position + 
+												   functionData.TemporaryVariables.back().Size;
 
+				auto& variable = slot.GetVariable();
+				auto& temporaryVariable = functionData.TemporaryVariables.emplace_back();
+				temporaryVariable.Port = slot.GetPort();
+				temporaryVariable.Position = temporaryVariablePosition;
+				switch(variable.GetVariableType())
+				{
+					case Koala::Utility::Core::VariableType::Float64:
+					{
+						temporaryVariable.Size = NumberVariableSize;
+						temporaryVariable.Mode = 1;
+						break;
+					}
+					case Koala::Utility::Core::VariableType::String:
+					{
+						temporaryVariable.Size = StringVariableSize;
+						temporaryVariable.Mode = 3;
+						break;
+					}
+					case Koala::Utility::Core::VariableType::Boolean:
+					{
+						temporaryVariable.Size = 1u;
+						temporaryVariable.Mode = 0;
+						break;
+					}
+				}
+
+				functionData.Code += (unsigned char)Utility::Instruction::push64;
+				functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(temporaryVariable.Position);
+				functionData.Code += (unsigned char)Utility::Instruction::push8;
+				functionData.Code += temporaryVariable.Mode;
+				functionData.Code += (unsigned char)Utility::Instruction::setlocal;
 			}
 		}
 	}
@@ -117,10 +186,18 @@ void Builder::Run()
 	std::string code;
 	std::map<std::string, size_t> functionPositions;
 
+	code += Utility::KoalaBinaryMark;
 	code += Utility::Extra::Util::GetBinaryNumber<long long>(constantBufferCode.size());
 	code += constantBufferCode;
 	for( auto& functionData : functionDatas )
 	{
+		// Reserve for temporary variables
+		size_t temporaryBufferSize = functionData.TemporaryVariables.back().Position + 
+									 functionData.TemporaryVariables.back().Size;
+		code += (unsigned char)Utility::Instruction::push64;
+		code += Utility::Extra::Util::GetBinaryNumber<long long>(temporaryBufferSize);
+		code += (unsigned char)Utility::Instruction::reserve;
+
 		functionPositions[functionData.Name] = code.size();
 		code += functionData.Code;
 	}

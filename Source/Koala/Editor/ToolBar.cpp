@@ -1,6 +1,7 @@
 #include <Koala/Editor/ToolBar.h>
 #include <Koala/Editor/CodeBoard.h>
 #include <Koala/Editor/Gfx/Renderer.h>
+#include <Koala/Utility/Platform.h>
 #include <Koala/Utility/Serialization.h>
 #include <algorithm>
 
@@ -8,6 +9,8 @@ namespace Koala::Editor {
 
 static Service::SaveProjectData ConvertSerializationData(const Utility::Serialization::Data& data);
 static Utility::Serialization::Data ConvertSerializationData(const Service::SaveProjectData& data);
+
+static void RunProgram(std::string program, std::string argv);
 
 ToolBar::ToolBar(const Tool::Window& window) :
 	Gfx::Panel(window, 
@@ -26,6 +29,8 @@ void ToolBar::OnGui()
 
 	static std::string currentSavePath;
 	static bool openSaveLoadPopup = false;
+	static bool compileProject = false;
+	static bool runProject = false;
 	const Vector2 PopupButtonSize = Vector2(0.47f, 0.25f);
 
 	// Icons
@@ -60,10 +65,10 @@ void ToolBar::OnGui()
 	Renderer::SetCursorPosition(ScreenMiddle);
 	if(Renderer::DrawIconButton(Utility::Icon::Run, ButtonHeight, ButtonColor))
 	{
-		auto data = GenerateLogMessageData();
-		data.Message = "Run button is pressed!";
-
-		SendMessage(Service::MessageType::LogInfo, &data);
+		Renderer::OpenPopup(Utility::Resource::GetText(Utility::Text::Save));
+		openSaveLoadPopup = true;
+		compileProject = true;
+		runProject = true;
 	}
 	{
 		Renderer::DrawSameLine();
@@ -72,10 +77,9 @@ void ToolBar::OnGui()
 	}
 	if(Renderer::DrawIconButton(Utility::Icon::Compile, ButtonHeight, ButtonColor))
 	{
-		auto data = GenerateLogMessageData();
-		data.Message = "Compile button is pressed!";
-
-		SendMessage(Service::MessageType::LogInfo, &data);
+		Renderer::OpenPopup(Utility::Resource::GetText(Utility::Text::Save));
+		openSaveLoadPopup = true;
+		compileProject = true;
 	}
 
 	// Pop-up
@@ -133,6 +137,22 @@ void ToolBar::OnGui()
 				SendMessage(Service::MessageType::SaveProject, &data);
 
 				Utility::Serialization::SaveProject(projectPath, ConvertSerializationData(data));
+
+				if(compileProject)
+				{
+					compileProject = false;
+
+					RunProgram("KoalaCompiler", projectPath);
+				}
+				if(runProject)
+				{
+					runProject = false;
+
+					std::string koaPath = projectPath;
+					koaPath.erase(koaPath.find_last_of('.'));
+					koaPath += ".koa";
+					RunProgram("KoalaVM", koaPath);
+				}
 			}
 			else
 			{
@@ -153,6 +173,8 @@ void ToolBar::OnGui()
 		{
 			Renderer::ClosePopup();
 			openSaveLoadPopup = false;
+			compileProject = false;
+			runProject = false;
 		}
 
 		Renderer::EndPopup();
@@ -206,6 +228,24 @@ static Utility::Serialization::Data ConvertSerializationData(const Service::Save
 	}
 
 	return otherData;
+}
+
+} // namespace Koala::Editor
+
+#if OS_WINDOWS
+#include <Windows.h>
+#include <ShellApi.h>
+#endif
+
+namespace Koala::Editor {
+
+static void RunProgram(std::string program, std::string argv)
+{
+#if OS_WINDOWS
+	ShellExecuteA(GetDesktopWindow(), "open", program.c_str(), argv.c_str(), NULL, SW_SHOW);
+#else
+#error No implementation on this OS
+#endif
 }
 
 } // namespace Koala::Editor

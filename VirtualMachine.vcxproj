@@ -87,21 +87,25 @@
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Bin\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <IncludePath>Source\;$(IncludePath)</IncludePath>
+    <TargetName>KoalaVM</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Bin\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <IncludePath>Source\;$(IncludePath)</IncludePath>
+    <TargetName>KoalaVM</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Bin\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <IncludePath>Source\;$(IncludePath)</IncludePath>
+    <TargetName>KoalaVM</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Bin\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <IncludePath>Source\;$(IncludePath)</IncludePath>
+    <TargetName>KoalaVM</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

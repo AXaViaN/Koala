@@ -86,23 +86,26 @@ void Builder::Run()
 			}
 
 			// Get inputs
-			for( auto it=node.GetBackSlots().rbegin() ; it!=node.GetBackSlots().rend()-1 ; ++it )
+			if(node.GetBackSlots().size() > 0)
 			{
-				auto& slot = *it;
-				
-				if(slot.IsConnected())
+				for( auto it=node.GetBackSlots().rbegin() ; it!=node.GetBackSlots().rend()-1 ; ++it )
 				{
-					auto& variable = functionData.GetTemporaryVariable(slot.GetConnections().at(0));
+					auto& slot = *it;
 
-					functionData.Code += (unsigned char)Utility::Instruction::push64;
-					functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(variable.Position);
-					functionData.Code += (unsigned char)Utility::Instruction::push8;
-					functionData.Code += variable.Mode;
-					functionData.Code += (unsigned char)Utility::Instruction::getlocal;
-				}
-				else
-				{
-					ProcessConstant(constantBufferCode, functionData.Code, slot.GetVariable());
+					if(slot.IsConnected())
+					{
+						auto& variable = functionData.GetTemporaryVariable(slot.GetConnections().at(0));
+
+						functionData.Code += (unsigned char)Utility::Instruction::push64;
+						functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(variable.Position);
+						functionData.Code += (unsigned char)Utility::Instruction::push8;
+						functionData.Code += variable.Mode;
+						functionData.Code += (unsigned char)Utility::Instruction::getlocal;
+					}
+					else
+					{
+						ProcessConstant(constantBufferCode, functionData.Code, slot.GetVariable());
+					}
 				}
 			}
 
@@ -142,42 +145,47 @@ void Builder::Run()
 			}
 
 			// Output
-			for( auto& slot : node.GetFrontSlots() )
+			if(node.GetFrontSlots().size() > 0)
 			{
-				size_t temporaryVariablePosition = functionData.TemporaryVariables.back().Position + 
-												   functionData.TemporaryVariables.back().Size;
-
-				auto& variable = slot.GetVariable();
-				auto& temporaryVariable = functionData.TemporaryVariables.emplace_back();
-				temporaryVariable.Port = slot.GetPort();
-				temporaryVariable.Position = temporaryVariablePosition;
-				switch(variable.GetVariableType())
+				for( auto it=node.GetFrontSlots().begin()+1 ; it!=node.GetFrontSlots().end() ; ++it )
 				{
-					case Koala::Utility::Core::VariableType::Float64:
-					{
-						temporaryVariable.Size = NumberVariableSize;
-						temporaryVariable.Mode = 1;
-						break;
-					}
-					case Koala::Utility::Core::VariableType::String:
-					{
-						temporaryVariable.Size = StringVariableSize;
-						temporaryVariable.Mode = 3;
-						break;
-					}
-					case Koala::Utility::Core::VariableType::Boolean:
-					{
-						temporaryVariable.Size = 1u;
-						temporaryVariable.Mode = 0;
-						break;
-					}
-				}
+					auto& slot = *it;
 
-				functionData.Code += (unsigned char)Utility::Instruction::push64;
-				functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(temporaryVariable.Position);
-				functionData.Code += (unsigned char)Utility::Instruction::push8;
-				functionData.Code += temporaryVariable.Mode;
-				functionData.Code += (unsigned char)Utility::Instruction::setlocal;
+					size_t temporaryVariablePosition = functionData.TemporaryVariables.back().Position + 
+						functionData.TemporaryVariables.back().Size;
+
+					auto& variable = slot.GetVariable();
+					auto& temporaryVariable = functionData.TemporaryVariables.emplace_back();
+					temporaryVariable.Port = slot.GetPort();
+					temporaryVariable.Position = temporaryVariablePosition;
+					switch(variable.GetVariableType())
+					{
+						case Koala::Utility::Core::VariableType::Float64:
+						{
+							temporaryVariable.Size = NumberVariableSize;
+							temporaryVariable.Mode = 1;
+							break;
+						}
+						case Koala::Utility::Core::VariableType::String:
+						{
+							temporaryVariable.Size = StringVariableSize;
+							temporaryVariable.Mode = 3;
+							break;
+						}
+						case Koala::Utility::Core::VariableType::Boolean:
+						{
+							temporaryVariable.Size = 1u;
+							temporaryVariable.Mode = 0;
+							break;
+						}
+					}
+
+					functionData.Code += (unsigned char)Utility::Instruction::push64;
+					functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(temporaryVariable.Position);
+					functionData.Code += (unsigned char)Utility::Instruction::push8;
+					functionData.Code += temporaryVariable.Mode;
+					functionData.Code += (unsigned char)Utility::Instruction::setlocal;
+				}
 			}
 		}
 	}
@@ -200,6 +208,11 @@ void Builder::Run()
 
 		functionPositions[functionData.Name] = code.size();
 		code += functionData.Code;
+
+		if(functionData.Name == Utility::Resource::GetText(Utility::Text::Program))
+		{
+			code += (unsigned char)Utility::Instruction::readchar;
+		}
 	}
 	
 	// Link functions
@@ -232,7 +245,7 @@ static std::vector<Utility::Core::Node> GetNodes(Koala::Utility::Serialization::
 	Utility::Core::SlotSide slotSide;
 	if(function.CoreNodeCount == 1)
 	{
-		nextNodeID = function.SceneNodes.at(0).Node.GetFrontSlots().at(0).GetConnections().at(0).NodeID;
+		nextNodeID = function.SceneNodes.at(0).Node.GetID();
 		slotSide = Utility::Core::SlotSide::Front;
 	}
 	else

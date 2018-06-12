@@ -11,6 +11,7 @@ static constexpr size_t StringVariableSize = 512u;
 
 static std::vector<Utility::Core::Node> GetNodes(Koala::Utility::Serialization::Function function);
 static void ProcessConstant(std::string& constantBufferCode, std::string& functionCode, const Koala::Utility::Core::Variable& variable);
+static void ProcessDefaultFunction(std::string& functionCode, const Koala::Utility::Text& defaultFunctionText);
 
 Builder::Builder(const std::string& binaryPath, const std::vector<Koala::Utility::Serialization::Function>& functions) : 
 	m_BinaryPath(binaryPath),
@@ -100,6 +101,7 @@ void Builder::Run()
 				else
 				{
 					// Process default function
+					ProcessDefaultFunction(functionData.Code, nodeTemplate.NameText);
 				}
 			}
 
@@ -208,18 +210,24 @@ static void ProcessConstant(std::string& constantBufferCode, std::string& functi
 	switch(variable.GetVariableType())
 	{
 		case Koala::Utility::Core::VariableType::Float64:
+		{
 			constantBufferCode += Utility::Extra::Util::GetBinaryNumber(variable.GetValueFloat64());
 			variableMode = 1;
 			break;
+		}
 		case Koala::Utility::Core::VariableType::String:
+		{
 			constantBufferCode += variable.GetValueString().substr(0, variable.GetValueString().find_first_of('\0'));
 			constantBufferCode += '\0';
 			variableMode = 3;
 			break;
+		}
 		case Koala::Utility::Core::VariableType::Boolean:
+		{
 			constantBufferCode += variable.GetValueBoolean();
 			variableMode = 0;
 			break;
+		}
 	}
 
 	functionCode += (unsigned char)Utility::Instruction::push64;
@@ -227,6 +235,122 @@ static void ProcessConstant(std::string& constantBufferCode, std::string& functi
 	functionCode += (unsigned char)Utility::Instruction::push8;
 	functionCode += variableMode;
 	functionCode += (unsigned char)Utility::Instruction::getconst;
+}
+
+static void ProcessDefaultFunction(std::string& functionCode, const Koala::Utility::Text& defaultFunctionText)
+{
+	switch(defaultFunctionText)
+	{
+		case Koala::Utility::Text::Add:
+		{
+			functionCode += (unsigned char)Utility::Instruction::add64;
+			break;
+		}
+		case Koala::Utility::Text::Subtract:
+		{
+			functionCode += (unsigned char)Utility::Instruction::sub64;
+			break;
+		}
+		case Koala::Utility::Text::Multiply:
+		{
+			functionCode += (unsigned char)Utility::Instruction::mul;
+			break;
+		}
+		case Koala::Utility::Text::Divide:
+		{
+			functionCode += (unsigned char)Utility::Instruction::div;
+			break;
+		}
+		case Koala::Utility::Text::SquareRoot:
+		{
+			functionCode += (unsigned char)Utility::Instruction::sqrt;
+			break;
+		}
+		case Koala::Utility::Text::Power:
+		{
+			functionCode += (unsigned char)Utility::Instruction::pow;
+			break;
+		}
+		case Koala::Utility::Text::Modulo:
+		{
+			functionCode += (unsigned char)Utility::Instruction::mod;
+			break;
+		}
+		case Koala::Utility::Text::Print:
+		{
+			functionCode += (unsigned char)Utility::Instruction::printstr;
+			functionCode += (unsigned char)Utility::Instruction::push8;
+			functionCode += '\n';
+			functionCode += (unsigned char)Utility::Instruction::printchar;
+			break;
+		}
+		case Koala::Utility::Text::ReadNumber:
+		{
+			functionCode += (unsigned char)Utility::Instruction::readnum;
+			break;
+		}
+		case Koala::Utility::Text::ReadString:
+		{
+			functionCode += (unsigned char)Utility::Instruction::readstr;
+			break;
+		}
+		case Koala::Utility::Text::If:
+		{
+			// TODO: Solve branching
+			break;
+		}
+		case Koala::Utility::Text::ForLoop:
+		{
+			// TODO: Solve branching
+			break;
+		}
+		case Koala::Utility::Text::WhileLoop:
+		{
+			// TODO: Solve branching
+			break;
+		}
+		case Koala::Utility::Text::Greater:
+		{
+			functionCode += (unsigned char)Utility::Instruction::greater64;
+			break;
+		}
+		case Koala::Utility::Text::Smaller:
+		{
+			functionCode += (unsigned char)Utility::Instruction::swap64;
+			functionCode += (unsigned char)Utility::Instruction::greater64;
+			break;
+		}
+		case Koala::Utility::Text::And:
+		{
+			functionCode += (unsigned char)Utility::Instruction::and;
+			break;
+		}
+		case Koala::Utility::Text::Or:
+		{
+			functionCode += (unsigned char)Utility::Instruction::or;
+			break;
+		}
+		case Koala::Utility::Text::NumberEquals:
+		{
+			functionCode += (unsigned char)Utility::Instruction::equal64;
+			break;
+		}
+		case Koala::Utility::Text::StringEquals:
+		{
+			functionCode += (unsigned char)Utility::Instruction::equalstr;
+			break;
+		}
+		case Koala::Utility::Text::NumberToString:
+		{
+			functionCode += (unsigned char)Utility::Instruction::d2s;
+			break;
+		}
+		case Koala::Utility::Text::StringToNumber:
+		{
+			functionCode += (unsigned char)Utility::Instruction::s2d;
+			break;
+		}
+	}
 }
 
 } // namespace Koala::Compiler

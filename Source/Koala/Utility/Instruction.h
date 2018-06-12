@@ -70,6 +70,7 @@ enum class Instruction : unsigned char
 	and,
 	or,
 	not,
+	equalstr,
 
 	// Branch
 	jmp = 0xD0,

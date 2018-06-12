@@ -248,6 +248,7 @@ static char SetupDefaultFunctions()
 		functionInfo.NameText = Text::If;
 		functionInfo.BackSlots.emplace_back("", VariableType::None);
 		functionInfo.BackSlots.emplace_back(Text::Condition, VariableType::Boolean);
+		functionInfo.FrontSlots.emplace_back("", VariableType::None);
 		functionInfo.FrontSlots.emplace_back(Text::IfTrue, VariableType::None);
 		functionInfo.FrontSlots.emplace_back(Text::IfFalse, VariableType::None);
 

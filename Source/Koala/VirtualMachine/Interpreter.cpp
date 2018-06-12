@@ -37,6 +37,21 @@ void Interpreter::Run()
 	auto& code = m_Code;
 	auto& IP = m_InstructionPtr;
 
+	auto& getStringFromStack = [&stack]() -> std::string
+	{
+		std::string str;
+		while(true)
+		{
+			char c = stack.Pop8();
+			if(c == '\0')
+			{
+				break;
+			}
+			str += c;
+		}
+		return str;
+	};
+
 	while(IP < code.size())
 	{
 		switch(ReadValue<Koala::Utility::Instruction>())
@@ -459,15 +474,7 @@ void Interpreter::Run()
 			}
 			case Koala::Utility::Instruction::s2i:
 			{
-				std::string str;
-				while(true)
-				{
-					char c = stack.Pop8();
-					if(c == '\0')
-						break;
-
-					str += c;
-				}
+				std::string str = getStringFromStack();
 				if(('0'<=str[0] && str[0]<='9') || 
 					(str.size()>1 && str[0]=='-' && '0'<=str[1] && str[1]<='9'))
 				{
@@ -494,15 +501,7 @@ void Interpreter::Run()
 			}
 			case Koala::Utility::Instruction::s2d:
 			{
-				std::string str;
-				while(true)
-				{
-					char c = stack.Pop8();
-					if(c == '\0')
-						break;
-
-					str += c;
-				}
+				std::string str = getStringFromStack();
 				if(('0'<=str[0] && str[0]<='9') || 
 					(str.size()>1 && str[0]=='-' && '0'<=str[1] && str[1]<='9'))
 				{
@@ -566,6 +565,15 @@ void Interpreter::Run()
 			case Koala::Utility::Instruction::not:
 			{
 				stack.Push8(!stack.Pop8());
+
+				break;
+			}
+			case Koala::Utility::Instruction::equalstr:
+			{
+				std::string str1 = getStringFromStack();
+				std::string str2 = getStringFromStack();
+
+				stack.Push8(str1 == str2);
 
 				break;
 			}

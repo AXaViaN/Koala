@@ -3,14 +3,13 @@
 #include <Koala/Editor/Gfx/Renderer.h>
 #include <Koala/Utility/Platform.h>
 #include <Koala/Utility/Serialization.h>
+#include <Koala/Utility/Extra/Util.h>
 #include <algorithm>
 
 namespace Koala::Editor {
 
 static Service::SaveProjectData ConvertSerializationData(const Utility::Serialization::Data& data);
 static Utility::Serialization::Data ConvertSerializationData(const Service::SaveProjectData& data);
-
-static void RunProgram(std::string program, std::string argv);
 
 ToolBar::ToolBar(const Tool::Window& window) :
 	Gfx::Panel(window, 
@@ -67,7 +66,6 @@ void ToolBar::OnGui()
 	{
 		Renderer::OpenPopup(Utility::Resource::GetText(Utility::Text::Save));
 		openSaveLoadPopup = true;
-		compileProject = true;
 		runProject = true;
 	}
 	{
@@ -142,16 +140,19 @@ void ToolBar::OnGui()
 				{
 					compileProject = false;
 
-					RunProgram("KoalaCompiler", projectPath);
+					Utility::Extra::Util::RunExternalProgram("KoalaCompiler", projectPath);
 				}
 				if(runProject)
 				{
 					runProject = false;
+					
+					// Compile before running
+					Utility::Extra::Util::RunExternalProgram("KoalaCompiler", projectPath, false);
 
 					std::string koaPath = projectPath;
 					koaPath.erase(koaPath.find_last_of('.'));
 					koaPath += ".koa";
-					RunProgram("KoalaVM", koaPath);
+					Utility::Extra::Util::RunExternalProgram("KoalaVM", koaPath);
 				}
 			}
 			else
@@ -228,24 +229,6 @@ static Utility::Serialization::Data ConvertSerializationData(const Service::Save
 	}
 
 	return otherData;
-}
-
-} // namespace Koala::Editor
-
-#if OS_WINDOWS
-#include <Windows.h>
-#include <ShellApi.h>
-#endif
-
-namespace Koala::Editor {
-
-static void RunProgram(std::string program, std::string argv)
-{
-#if OS_WINDOWS
-	ShellExecuteA(GetDesktopWindow(), "open", program.c_str(), argv.c_str(), NULL, SW_SHOW);
-#else
-#error No implementation on this OS
-#endif
 }
 
 } // namespace Koala::Editor

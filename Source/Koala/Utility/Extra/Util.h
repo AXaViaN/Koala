@@ -22,6 +22,8 @@ public:
 	}
 	static std::string GetBinaryNumber(const void* value, size_t size);
 
+	static void RunExternalProgram(std::string programPath, std::string argv="", bool async=true);
+
 };
 
 } // namespace Koala::Utility::Extra

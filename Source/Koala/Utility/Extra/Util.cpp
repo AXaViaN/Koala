@@ -1,4 +1,10 @@
 #include <Koala/Utility/Extra/Util.h>
+#include <Koala/Utility/Platform.h>
+
+#if OS_WINDOWS
+#include <Windows.h>
+#include <ShellApi.h>
+#endif
 
 namespace Koala::Utility::Extra {
 
@@ -73,6 +79,29 @@ std::string Util::GetBinaryNumber(const void* value, size_t size)
 		numberAsStr += static_cast<char*>(fixedValue)[i];
 	}
 	return numberAsStr;
+}
+
+void Util::RunExternalProgram(std::string programPath, std::string argv, bool async)
+{
+#if OS_WINDOWS
+	auto hProcess = ShellExecuteA(GetDesktopWindow(), "open", programPath.c_str(), argv.c_str(), NULL, SW_SHOW);
+
+	if(async == false)
+	{
+		DWORD exitCode = STILL_ACTIVE;
+		while(exitCode == STILL_ACTIVE)
+		{
+			Sleep(100);
+			auto result = GetExitCodeProcess(hProcess, &exitCode);
+			if(result == FALSE)
+			{
+				exitCode = !STILL_ACTIVE;
+			}
+		}
+	}
+#else
+#error No implementation on this OS
+#endif
 }
 
 } // namespace Koala::Utility::Extra

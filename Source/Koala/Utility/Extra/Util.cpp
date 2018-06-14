@@ -88,14 +88,14 @@ void Util::RunExternalProgram(std::string programPath, std::string argv, bool as
 
 	if(async == false)
 	{
-		DWORD exitCode = STILL_ACTIVE;
-		while(exitCode == STILL_ACTIVE)
+		auto status = STILL_ACTIVE;
+		while(status == STILL_ACTIVE)
 		{
 			Sleep(100);
-			auto result = GetExitCodeProcess(hProcess, &exitCode);
+			auto result = GetExitCodeProcess(hProcess, &status);
 			if(result == FALSE)
 			{
-				exitCode = !STILL_ACTIVE;
+				status = !STILL_ACTIVE;
 			}
 		}
 	}

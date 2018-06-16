@@ -71,7 +71,10 @@ static void FindFlows(std::map<Utility::Core::NodeID, FunctionFlows>& nodeFlows,
 
 static void CompileNodes(std::string& constantBufferCode, FunctionData& functionData, const std::map<Utility::Core::NodeID, FunctionFlows>& flows, const std::vector<Utility::Core::Node>& nodes, bool isMainFlow);
 static void ProcessConstant(std::string& constantBufferCode, std::string& functionCode, const Koala::Utility::Core::Variable& variable);
-static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData& functionData, const std::map<Utility::Core::NodeID, FunctionFlows>& flows, const Utility::Core::NodeID& nodeID, const Koala::Utility::Text& defaultFunctionText);
+static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData& functionData, const std::map<Utility::Core::NodeID, FunctionFlows>& flows, const Utility::Core::Node& node, const Koala::Utility::Text& defaultFunctionText);
+static TemporaryVariable CreateLocalVariable(FunctionData& functionData, const Utility::Core::Port& port, const Utility::Core::VariableType& variableType);
+static void CallLocalVariable(FunctionData& functionData, const TemporaryVariable& temporaryVariable);
+static void LoadLocalVariable(FunctionData& functionData, const TemporaryVariable& temporaryVariable);
 
 Builder::Builder(const std::string& binaryPath, const std::vector<Koala::Utility::Serialization::Function>& functions) : 
 	m_BinaryPath(binaryPath),
@@ -115,12 +118,6 @@ void Builder::Run()
 
 		functionPositions[functionData.Name] = code.size();
 		code += functionData.Code;
-
-		if(functionData.Name == Utility::Resource::GetText(Utility::Text::Program))
-		{
-			code.back() = (unsigned char)Utility::Instruction::readchar;
-			code += (unsigned char)Utility::Instruction::ret;
-		}
 	}
 	
 	// Linker
@@ -296,12 +293,7 @@ static void CompileNodes(std::string& constantBufferCode, FunctionData& function
 				if(slot.IsConnected())
 				{
 					auto& variable = functionData.GetTemporaryVariable(slot.GetConnections().at(0));
-
-					functionData.Code += (unsigned char)Utility::Instruction::push64;
-					functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(variable.Position);
-					functionData.Code += (unsigned char)Utility::Instruction::push8;
-					functionData.Code += variable.Mode;
-					functionData.Code += (unsigned char)Utility::Instruction::getlocal;
+					CallLocalVariable(functionData, variable);
 				}
 				else
 				{
@@ -339,7 +331,7 @@ static void CompileNodes(std::string& constantBufferCode, FunctionData& function
 			else
 			{
 				// Process default function
-				ProcessDefaultFunction(constantBufferCode, functionData, flows, node.GetID(), nodeTemplate.NameText);
+				ProcessDefaultFunction(constantBufferCode, functionData, flows, node, nodeTemplate.NameText);
 			}
 		}
 
@@ -353,40 +345,8 @@ static void CompileNodes(std::string& constantBufferCode, FunctionData& function
 			{
 				auto& slot = *it;
 
-				size_t temporaryVariablePosition = functionData.TemporaryVariables.back().Position + 
-												   functionData.TemporaryVariables.back().Size;
-
-				auto& variable = slot.GetVariable();
-				auto& temporaryVariable = functionData.TemporaryVariables.emplace_back();
-				temporaryVariable.Port = slot.GetPort();
-				temporaryVariable.Position = temporaryVariablePosition;
-				switch(variable.GetVariableType())
-				{
-					case Koala::Utility::Core::VariableType::Float64:
-					{
-						temporaryVariable.Size = NumberVariableSize;
-						temporaryVariable.Mode = 1;
-						break;
-					}
-					case Koala::Utility::Core::VariableType::String:
-					{
-						temporaryVariable.Size = StringVariableSize;
-						temporaryVariable.Mode = 3;
-						break;
-					}
-					case Koala::Utility::Core::VariableType::Boolean:
-					{
-						temporaryVariable.Size = 1u;
-						temporaryVariable.Mode = 0;
-						break;
-					}
-				}
-
-				functionData.Code += (unsigned char)Utility::Instruction::push64;
-				functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(temporaryVariable.Position);
-				functionData.Code += (unsigned char)Utility::Instruction::push8;
-				functionData.Code += temporaryVariable.Mode;
-				functionData.Code += (unsigned char)Utility::Instruction::setlocal;
+				auto variable = CreateLocalVariable(functionData, slot.GetPort(), slot.GetVariable().GetVariableType());
+				LoadLocalVariable(functionData, variable);
 			}
 		}
 	}
@@ -424,7 +384,7 @@ static void ProcessConstant(std::string& constantBufferCode, std::string& functi
 	functionCode += variableMode;
 	functionCode += (unsigned char)Utility::Instruction::getconst;
 }
-static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData& functionData, const std::map<Utility::Core::NodeID, FunctionFlows>& flows, const Utility::Core::NodeID& nodeID, const Koala::Utility::Text& defaultFunctionText)
+static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData& functionData, const std::map<Utility::Core::NodeID, FunctionFlows>& flows, const Utility::Core::Node& node, const Koala::Utility::Text& defaultFunctionText)
 {
 	switch(defaultFunctionText)
 	{
@@ -494,7 +454,7 @@ static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData
 			functionData.Code += (unsigned char)Utility::Instruction::jmpcond;
 
 			// Process the false branch
-			CompileNodes(constantBufferCode, functionData, flows, flows.at(nodeID).Flows[1].Flow, false);
+			CompileNodes(constantBufferCode, functionData, flows, flows.at(node.GetID()).Flows[1].Flow, false);
 
 			// Jump to the end-of-branch
 			functionData.Code += (unsigned char)Utility::Instruction::push64;
@@ -504,7 +464,9 @@ static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData
 
 			// Process the true branch
 			trueBranch.BranchPosition = functionData.Code.size();
-			CompileNodes(constantBufferCode, functionData, flows, flows.at(nodeID).Flows[0].Flow, false);
+			CompileNodes(constantBufferCode, functionData, flows, flows.at(node.GetID()).Flows[0].Flow, false);
+			
+			// end-of-branch
 			endBranch.BranchPosition = functionData.Code.size();
 
 			// Linking data
@@ -515,12 +477,106 @@ static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData
 		}
 		case Koala::Utility::Text::ForLoop:
 		{
-			// TODO: Solve branching
+			// Linking data
+			BranchLink jumpBackLink;
+			BranchLink conditionLink;
+
+			// Looping variables
+			auto indexVariable = CreateLocalVariable(functionData, node.GetFrontSlots().at(1).GetPort(), Utility::Core::VariableType::Float64);
+			auto endVariable = CreateLocalVariable(functionData, {}, Utility::Core::VariableType::Float64);
+
+			// Remove the floating values and save to local variable
+			functionData.Code += (unsigned char)Utility::Instruction::d2i;
+			functionData.Code += (unsigned char)Utility::Instruction::i2d;
+			LoadLocalVariable(functionData, indexVariable);
+			functionData.Code += (unsigned char)Utility::Instruction::d2i;
+			functionData.Code += (unsigned char)Utility::Instruction::i2d;
+			LoadLocalVariable(functionData, endVariable);
+
+			// Comparison
+			jumpBackLink.BranchPosition = functionData.Code.size();
+			CallLocalVariable(functionData, endVariable);
+			CallLocalVariable(functionData, indexVariable);
+			functionData.Code += (unsigned char)Utility::Instruction::greater64;
+
+			// Jump to end-of-loop
+			functionData.Code += (unsigned char)Utility::Instruction::push64;
+			conditionLink.LinkPosition = functionData.Code.size();
+			functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(-1);
+			functionData.Code += (unsigned char)Utility::Instruction::jmpcond;
+
+			// Process the loop body
+			CompileNodes(constantBufferCode, functionData, flows, flows.at(node.GetID()).Flows[0].Flow, false);
+
+			// Increase the index
+			CallLocalVariable(functionData, indexVariable);
+			functionData.Code += (unsigned char)Utility::Instruction::push64;
+			functionData.Code += Utility::Extra::Util::GetBinaryNumber<double>(1.0);
+			functionData.Code += (unsigned char)Utility::Instruction::add64;
+			LoadLocalVariable(functionData, indexVariable);
+
+			// Jump back
+			functionData.Code += (unsigned char)Utility::Instruction::push64;
+			jumpBackLink.LinkPosition = functionData.Code.size();
+			functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(-1);
+			functionData.Code += (unsigned char)Utility::Instruction::jmp;
+
+			// end-of-loop
+			conditionLink.BranchPosition = functionData.Code.size();
+
+			// Linking data
+			functionData.BranchLinks.emplace_back(jumpBackLink);
+			functionData.BranchLinks.emplace_back(conditionLink);
+
 			break;
 		}
 		case Koala::Utility::Text::WhileLoop:
 		{
-			// TODO: Solve branching
+			// Linking data
+			BranchLink jumpBackLink;
+			BranchLink conditionLink;
+
+			// Looping variable
+			TemporaryVariable conditionVariable;
+			auto& slot = node.GetBackSlots().at(1);
+			if(slot.IsConnected())
+			{
+				conditionVariable = functionData.GetTemporaryVariable(slot.GetConnections().at(0));
+				functionData.Code += (unsigned char)Utility::Instruction::drop8;
+			}
+			else
+			{
+				conditionVariable = CreateLocalVariable(functionData, {}, Utility::Core::VariableType::Boolean);
+				LoadLocalVariable(functionData, conditionVariable);
+			}
+
+			// Condition check
+			jumpBackLink.BranchPosition = functionData.Code.size();
+			CallLocalVariable(functionData, conditionVariable);
+			functionData.Code += (unsigned char)Utility::Instruction::not;
+
+			// Jump to end-of-loop
+			functionData.Code += (unsigned char)Utility::Instruction::push64;
+			conditionLink.LinkPosition = functionData.Code.size();
+			functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(-1);
+			functionData.Code += (unsigned char)Utility::Instruction::jmpcond;
+
+			// Process the loop body
+			CompileNodes(constantBufferCode, functionData, flows, flows.at(node.GetID()).Flows[0].Flow, false);
+
+			// Jump back
+			functionData.Code += (unsigned char)Utility::Instruction::push64;
+			jumpBackLink.LinkPosition = functionData.Code.size();
+			functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(-1);
+			functionData.Code += (unsigned char)Utility::Instruction::jmp;
+
+			// end-of-loop
+			conditionLink.BranchPosition = functionData.Code.size();
+
+			// Linking data
+			functionData.BranchLinks.emplace_back(jumpBackLink);
+			functionData.BranchLinks.emplace_back(conditionLink);
+
 			break;
 		}
 		case Koala::Utility::Text::Greater:
@@ -565,6 +621,54 @@ static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData
 			break;
 		}
 	}
+}
+static TemporaryVariable CreateLocalVariable(FunctionData& functionData, const Utility::Core::Port& port, const Utility::Core::VariableType& variableType)
+{
+	size_t temporaryVariablePosition = functionData.TemporaryVariables.back().Position + 
+									   functionData.TemporaryVariables.back().Size;
+
+	auto& temporaryVariable = functionData.TemporaryVariables.emplace_back();
+	temporaryVariable.Port = port;
+	temporaryVariable.Position = temporaryVariablePosition;
+	switch(variableType)
+	{
+		case Koala::Utility::Core::VariableType::Float64:
+		{
+			temporaryVariable.Size = NumberVariableSize;
+			temporaryVariable.Mode = 1;
+			break;
+		}
+		case Koala::Utility::Core::VariableType::String:
+		{
+			temporaryVariable.Size = StringVariableSize;
+			temporaryVariable.Mode = 3;
+			break;
+		}
+		case Koala::Utility::Core::VariableType::Boolean:
+		{
+			temporaryVariable.Size = 1u;
+			temporaryVariable.Mode = 0;
+			break;
+		}
+	}
+
+	return temporaryVariable;
+}
+static void CallLocalVariable(FunctionData& functionData, const TemporaryVariable& temporaryVariable)
+{
+	functionData.Code += (unsigned char)Utility::Instruction::push64;
+	functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(temporaryVariable.Position);
+	functionData.Code += (unsigned char)Utility::Instruction::push8;
+	functionData.Code += temporaryVariable.Mode;
+	functionData.Code += (unsigned char)Utility::Instruction::getlocal;
+}
+static void LoadLocalVariable(FunctionData& functionData, const TemporaryVariable& temporaryVariable)
+{
+	functionData.Code += (unsigned char)Utility::Instruction::push64;
+	functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(temporaryVariable.Position);
+	functionData.Code += (unsigned char)Utility::Instruction::push8;
+	functionData.Code += temporaryVariable.Mode;
+	functionData.Code += (unsigned char)Utility::Instruction::setlocal;
 }
 
 } // namespace Koala::Compiler

@@ -15,11 +15,6 @@ struct FunctionFlows
 	std::vector<FunctionFlow> Flows;
 };
 
-struct FunctionLink
-{
-	std::string FunctionName;
-	size_t LinkPosition = 0;
-};
 struct TemporaryVariable
 {
 	Utility::Core::Port Port;
@@ -27,12 +22,23 @@ struct TemporaryVariable
 	size_t Size = 0;
 	unsigned char Mode = 0; // mode0: char, mode1: double, mode2: long long, mode3: string
 };
+struct FunctionLink
+{
+	std::string FunctionName;
+	size_t LinkPosition = 0;
+};
+struct BranchLink
+{
+	size_t BranchPosition = 0;
+	size_t LinkPosition = 0;
+};
 struct FunctionData
 {
 	std::string Name;
 	std::string Code;
-	std::vector<FunctionLink> FunctionLinks;
 	std::vector<TemporaryVariable> TemporaryVariables;
+	std::vector<FunctionLink> FunctionLinks;
+	std::vector<BranchLink> BranchLinks;
 
 public:
 	FunctionData()
@@ -96,7 +102,6 @@ void Builder::Run()
 	std::string code;
 	std::map<std::string, size_t> functionPositions;
 
-	code += Utility::KoalaBinaryMark;
 	code += Utility::Extra::Util::GetBinaryNumber<long long>(constantBufferCode.size());
 	code += constantBufferCode;
 	for( auto& functionData : functionDatas )
@@ -113,21 +118,36 @@ void Builder::Run()
 
 		if(functionData.Name == Utility::Resource::GetText(Utility::Text::Program))
 		{
-			code += (unsigned char)Utility::Instruction::readchar;
+			code.back() = (unsigned char)Utility::Instruction::readchar;
+			code += (unsigned char)Utility::Instruction::ret;
 		}
 	}
 	
-	// Link functions
+	// Linker
 	for( auto& functionData : functionDatas )
 	{
 		size_t currentFunctionPosition = functionPositions[functionData.Name];
+
+		// Link functions
 		for( auto& link : functionData.FunctionLinks )
 		{
 			size_t linkedFunctionPosition = functionPositions[link.FunctionName];
 			auto value = Utility::Extra::Util::GetBinaryNumber<long long>(linkedFunctionPosition);
 
-			auto linkCodeBegin = code.begin() + currentFunctionPosition + link.LinkPosition;
-			code.replace(linkCodeBegin, linkCodeBegin+value.size(), value);
+			auto replaceBegin = code.begin() + currentFunctionPosition + link.LinkPosition;
+			code.replace(replaceBegin, replaceBegin+value.size(), value);
+		}
+
+		// Link branches
+		for( auto& link : functionData.BranchLinks )
+		{
+			auto fixedLink = link;
+			fixedLink.BranchPosition += currentFunctionPosition;
+			fixedLink.LinkPosition += currentFunctionPosition;
+
+			auto value = Utility::Extra::Util::GetBinaryNumber<long long>(fixedLink.BranchPosition);
+			auto replaceBegin = code.begin() + fixedLink.LinkPosition;
+			code.replace(replaceBegin, replaceBegin+value.size(), value);
 		}
 	}
 
@@ -136,7 +156,7 @@ void Builder::Run()
 	if(binaryFile.IsValid())
 	{
 		binaryFile.DeleteContents();
-		binaryFile.Write(code);
+		binaryFile.Write(Utility::KoalaBinaryMark + code);
 	}
 }
 
@@ -310,10 +330,8 @@ static void CompileNodes(std::string& constantBufferCode, FunctionData& function
 				link.FunctionName = nodeTemplate.Name;
 
 				functionData.Code += (unsigned char)Utility::Instruction::push64;
-
 				link.LinkPosition = functionData.Code.size();
 				functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(-1);
-
 				functionData.Code += (unsigned char)Utility::Instruction::call;
 
 				functionData.FunctionLinks.emplace_back(link);
@@ -326,14 +344,17 @@ static void CompileNodes(std::string& constantBufferCode, FunctionData& function
 		}
 
 		// Output
-		if(node.GetFrontSlots().size() > 0)
+		if(node.GetFrontSlots().size() > 0 && 
+		   nodeTemplate.NameText != Utility::Text::If && 
+		   nodeTemplate.NameText != Utility::Text::ForLoop && 
+		   nodeTemplate.NameText != Utility::Text::WhileLoop)
 		{
 			for( auto it=node.GetFrontSlots().begin()+1 ; it!=node.GetFrontSlots().end() ; ++it )
 			{
 				auto& slot = *it;
 
 				size_t temporaryVariablePosition = functionData.TemporaryVariables.back().Position + 
-					functionData.TemporaryVariables.back().Size;
+												   functionData.TemporaryVariables.back().Size;
 
 				auto& variable = slot.GetVariable();
 				auto& temporaryVariable = functionData.TemporaryVariables.emplace_back();
@@ -462,14 +483,34 @@ static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData
 		}
 		case Koala::Utility::Text::If:
 		{
-			// TODO: Solve branching
+			// Linking data
+			BranchLink trueBranch;
+			BranchLink endBranch;
 
-			// Solution:
-			// Use CompileNodes() to compile branches
-			// Get branch nodes from "flows" and "nodeID"
-			//  e.g. CompileNodes(constantBufferCode, functionData, flows, flows.at(nodeID).Flows[0].Flow, false);
+			// Jump to true branch if the condition is true
+			functionData.Code += (unsigned char)Utility::Instruction::push64;
+			trueBranch.LinkPosition = functionData.Code.size();
+			functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(-1);
+			functionData.Code += (unsigned char)Utility::Instruction::jmpcond;
 
-			// TODO: Solve jump linking
+			// Process the false branch
+			CompileNodes(constantBufferCode, functionData, flows, flows.at(nodeID).Flows[1].Flow, false);
+
+			// Jump to the end-of-branch
+			functionData.Code += (unsigned char)Utility::Instruction::push64;
+			endBranch.LinkPosition = functionData.Code.size();
+			functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(-1);
+			functionData.Code += (unsigned char)Utility::Instruction::jmp;
+
+			// Process the true branch
+			trueBranch.BranchPosition = functionData.Code.size();
+			CompileNodes(constantBufferCode, functionData, flows, flows.at(nodeID).Flows[0].Flow, false);
+			endBranch.BranchPosition = functionData.Code.size();
+
+			// Linking data
+			functionData.BranchLinks.emplace_back(trueBranch);
+			functionData.BranchLinks.emplace_back(endBranch);
+
 			break;
 		}
 		case Koala::Utility::Text::ForLoop:

@@ -26,6 +26,8 @@ Palette::Palette(const Tool::Window& window) :
 		Utility::Text::If,
 		Utility::Text::ForLoop,
 		Utility::Text::WhileLoop,
+		Utility::Text::Continue,
+		Utility::Text::Break,
 	};
 	m_FunctionList[Utility::Text::General] = {
 		Utility::Text::Greater,

@@ -281,6 +281,18 @@ static char SetupDefaultFunctions()
 		FunctionManager::Add(functionInfo);
 	}
 
+	// Continue & Break
+	{
+		FunctionInfo functionInfo;
+		functionInfo.NameText = Text::Continue;
+		functionInfo.BackSlots.emplace_back("", VariableType::None);
+
+		FunctionManager::Add(functionInfo);
+
+		functionInfo.NameText = Text::Break;
+		FunctionManager::Add(functionInfo);
+	}
+
 	// Greater, Smaller, NumberEquals
 	{
 		FunctionInfo functionInfo;

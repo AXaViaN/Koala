@@ -75,6 +75,8 @@ Resource::Resource()
 	m_TextMap[Text::If] = u8"Eger";
 	m_TextMap[Text::ForLoop] = u8"Sirali Döngü";
 	m_TextMap[Text::WhileLoop] = u8"Kosullu Döngü";
+	m_TextMap[Text::Continue] = u8"Döngüye Devam";
+	m_TextMap[Text::Break] = u8"Döngüden Cikis";
 	m_TextMap[Text::Loop] = u8"Döngü";
 	m_TextMap[Text::Condition] = u8"Sart";
 	m_TextMap[Text::True] = u8"Dogru";

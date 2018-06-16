@@ -73,6 +73,8 @@ enum class Text : unsigned int
 	If,
 	ForLoop,
 	WhileLoop,
+	Continue,
+	Break,
 	Loop,
 	Condition,
 	True,

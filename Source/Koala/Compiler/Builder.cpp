@@ -3,6 +3,7 @@
 #include <Koala/Utility/Instruction.h>
 #include <Koala/Utility/Extra/Util.h>
 #include <algorithm>
+#include <stack>
 
 namespace Koala::Compiler {
 
@@ -32,6 +33,15 @@ struct BranchLink
 	size_t BranchPosition = 0;
 	size_t LinkPosition = 0;
 };
+struct LoopInterrupt
+{
+	Utility::Text Type; // Continue or Break
+	size_t LinkPosition = 0;
+};
+struct LoopInterrupts
+{
+	std::vector<LoopInterrupt> Interrupts;
+};
 struct FunctionData
 {
 	std::string Name;
@@ -39,6 +49,9 @@ struct FunctionData
 	std::vector<TemporaryVariable> TemporaryVariables;
 	std::vector<FunctionLink> FunctionLinks;
 	std::vector<BranchLink> BranchLinks;
+
+	std::stack<Utility::Core::NodeID> LoopStack;
+	std::map<Utility::Core::NodeID, LoopInterrupts> LoopInterrupts;
 
 public:
 	FunctionData()
@@ -254,9 +267,11 @@ static void FindFlows(std::map<Utility::Core::NodeID, FunctionFlows>& nodeFlows,
 		}
 
 		// Determine the new nextNodeID
-		if(currentNode.GetSlots(slotSide).at(0).IsConnected())
+		auto& nextSlots = currentNode.GetSlots(slotSide);
+		if(nextSlots.size() > 0 && 
+		   nextSlots.at(0).IsConnected())
 		{
-			nextNodeID = currentNode.GetSlots(slotSide).at(0).GetConnections().at(0).NodeID;
+			nextNodeID = nextSlots.at(0).GetConnections().at(0).NodeID;
 		}
 		else
 		{
@@ -477,6 +492,9 @@ static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData
 		}
 		case Koala::Utility::Text::ForLoop:
 		{
+			// Push loop node ID
+			functionData.LoopStack.push(node.GetID());
+
 			// Linking data
 			BranchLink jumpBackLink;
 			BranchLink conditionLink;
@@ -509,6 +527,7 @@ static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData
 			CompileNodes(constantBufferCode, functionData, flows, flows.at(node.GetID()).Flows[0].Flow, false);
 
 			// Increase the index
+			size_t continueBranchPosition = functionData.Code.size();
 			CallLocalVariable(functionData, indexVariable);
 			functionData.Code += (unsigned char)Utility::Instruction::push64;
 			functionData.Code += Utility::Extra::Util::GetBinaryNumber<double>(1.0);
@@ -528,10 +547,34 @@ static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData
 			functionData.BranchLinks.emplace_back(jumpBackLink);
 			functionData.BranchLinks.emplace_back(conditionLink);
 
+			// Loop interrupt links
+			for( auto& interrupt : functionData.LoopInterrupts[node.GetID()].Interrupts )
+			{
+				BranchLink link;
+				link.LinkPosition = interrupt.LinkPosition;
+
+				if(interrupt.Type == Utility::Text::Continue)
+				{
+					link.BranchPosition = continueBranchPosition;
+				}
+				else if(interrupt.Type == Utility::Text::Break)
+				{
+					link.BranchPosition = conditionLink.BranchPosition;
+				}
+
+				functionData.BranchLinks.emplace_back(link);
+			}
+
+			// Pop loop node ID
+			functionData.LoopStack.pop();
+
 			break;
 		}
 		case Koala::Utility::Text::WhileLoop:
 		{
+			// Push loop node ID
+			functionData.LoopStack.push(node.GetID());
+
 			// Linking data
 			BranchLink jumpBackLink;
 			BranchLink conditionLink;
@@ -576,6 +619,63 @@ static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData
 			// Linking data
 			functionData.BranchLinks.emplace_back(jumpBackLink);
 			functionData.BranchLinks.emplace_back(conditionLink);
+
+			// Loop interrupt links
+			for( auto& interrupt : functionData.LoopInterrupts[node.GetID()].Interrupts )
+			{
+				BranchLink link;
+				link.LinkPosition = interrupt.LinkPosition;
+
+				if(interrupt.Type == Utility::Text::Continue)
+				{
+					link.BranchPosition = jumpBackLink.BranchPosition;
+				}
+				else if(interrupt.Type == Utility::Text::Break)
+				{
+					link.BranchPosition = conditionLink.BranchPosition;
+				}
+
+				functionData.BranchLinks.emplace_back(link);
+			}
+
+			// Pop loop node ID
+			functionData.LoopStack.pop();
+
+			break;
+		}
+		case Koala::Utility::Text::Continue:
+		{
+			LoopInterrupt interrupt;
+			interrupt.Type = Utility::Text::Continue;
+
+			functionData.Code += (unsigned char)Utility::Instruction::push64;
+			interrupt.LinkPosition = functionData.Code.size();
+			functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(-1);
+			functionData.Code += (unsigned char)Utility::Instruction::jmp;
+
+			if(functionData.LoopStack.empty() == false)
+			{
+				auto loopNodeID = functionData.LoopStack.top();
+				functionData.LoopInterrupts[loopNodeID].Interrupts.emplace_back(interrupt);
+			}
+
+			break;
+		}
+		case Koala::Utility::Text::Break:
+		{
+			LoopInterrupt interrupt;
+			interrupt.Type = Utility::Text::Break;
+
+			functionData.Code += (unsigned char)Utility::Instruction::push64;
+			interrupt.LinkPosition = functionData.Code.size();
+			functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(-1);
+			functionData.Code += (unsigned char)Utility::Instruction::jmp;
+
+			if(functionData.LoopStack.empty() == false)
+			{
+				auto loopNodeID = functionData.LoopStack.top();
+				functionData.LoopInterrupts[loopNodeID].Interrupts.emplace_back(interrupt);
+			}
 
 			break;
 		}

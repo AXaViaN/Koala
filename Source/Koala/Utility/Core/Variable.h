@@ -41,6 +41,11 @@ public:
 		return m_Type;
 	}
 
+	void SetName(const std::string& name)
+	{
+		m_Name = name;
+	}
+
 	void SetValueFloat64(double value)
 	{
 		m_ValueFloat64 = value;

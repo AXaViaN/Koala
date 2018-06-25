@@ -271,6 +271,19 @@ bool Renderer::DrawIconButton(Utility::Icon icon, const Vector2& size, const Col
 							  backgroundColor);
 }
 
+void Renderer::PushItemID(const void* id)
+{
+	ImGui::PushID(id);
+}
+void Renderer::PushItemID(int id)
+{
+	ImGui::PushID(id);
+}
+void Renderer::PopItemID()
+{
+	ImGui::PopID();
+}
+
 void Renderer::InputText(std::string* str, Utility::Text defaultText)
 {
 	if(str == nullptr)
@@ -292,6 +305,34 @@ void Renderer::InputText(std::string* str, Utility::Text defaultText)
 		ImGui::SetCursorPos(cursorPos);
 		ImGui::TextDisabled(Utility::Resource::GetText(defaultText).c_str());
 	}
+}
+void Renderer::InputInt(int* value)
+{
+	if(value == nullptr)
+	{
+		return;
+	}
+
+	ImGui::PushID(value);
+	ImGui::InputInt("##input_int", value);
+	ImGui::PopID();
+}
+void Renderer::ComboBox(int* selectedIdx, const std::vector<std::string>& elements)
+{
+	if(selectedIdx == nullptr)
+	{
+		return;
+	}
+
+	std::string elementString;
+	for( auto& element : elements )
+	{
+		elementString += element + '\0';
+	}
+
+	ImGui::PushID(selectedIdx);
+	ImGui::Combo("##combo_box", selectedIdx, elementString.c_str());
+	ImGui::PopID();
 }
 
 bool Renderer::DrawTree(Utility::Text text)

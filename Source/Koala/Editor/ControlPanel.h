@@ -2,6 +2,7 @@
 #define KOALA__EDITOR__CONTROL_PANEL
 
 #include <Koala/Editor/Gfx/Panel.h>
+#include <Koala/Utility/Core/FunctionManager.h>
 
 namespace Koala::Editor {
 
@@ -12,6 +13,10 @@ public:
 
 private:
 	virtual void OnGui() override;
+	virtual void OnMessage(Service::MessageType type, void* data) override;
+
+private:
+	std::vector<Utility::Core::FunctionID> m_UserFunctionIDs;
 
 };
 

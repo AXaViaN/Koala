@@ -67,6 +67,9 @@ struct InputMessageData
 	\
 	value(RequestNode) \
 	value(SpawnNode) \
+	\
+	value(EditUserFunction) \
+	value(RemoveUserFunction) \
 
 DECLARE_ENUM(MessageType, MESSAGE_TYPES)
 
@@ -116,6 +119,12 @@ struct SpawnNodeData
 {
 	const Utility::Core::FunctionID FunctionID;
 };
+
+struct EditUserFunctionData
+{
+	const Utility::Core::FunctionID FunctionID;
+};
+using RemoveUserFunctionData = EditUserFunctionData;
 
 } // namespace Koala::Editor::Service
 

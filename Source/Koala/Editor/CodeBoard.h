@@ -32,7 +32,9 @@ private:
 	void Initialize();
 
 	SceneNode& GetSceneNode(Utility::Core::NodeID nodeID);
+	void RemoveSceneNode(const Utility::Core::Node& node);
 	void RemoveConnections(Utility::Core::Slot& slot, Utility::Core::SlotSide slotSide);
+	void UpdateNodeVariables(Utility::Core::Node& node, Utility::Core::SlotSide slotSide, const std::vector<Utility::Core::Variable>& defaultVariables);
 
 private:
 	const Tool::Window& m_Window;
@@ -53,6 +55,7 @@ struct SceneNode
 };
 struct Function
 {
+	Utility::Core::FunctionID FunctionID = 0;
 	std::vector<SceneNode> SceneNodes;
 	size_t CoreNodeCount = 1;
 

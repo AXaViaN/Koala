@@ -39,8 +39,14 @@ public:
 	static bool DrawButton(Utility::Text text, const Vector2& size, bool highlight=false);
 	static bool DrawIconButton(Utility::Icon icon, float height, const Color& bgColor=Color(0,0,0,0));
 	static bool DrawIconButton(Utility::Icon icon, const Vector2& size, const Color& bgColor=Color(0,0,0,0));
+	
+	static void PushItemID(const void* id);
+	static void PushItemID(int id);
+	static void PopItemID();
 
 	static void InputText(std::string* str, Utility::Text defaultText=Utility::Text::Empty);
+	static void InputInt(int* value);
+	static void ComboBox(int* selectedIdx, const std::vector<std::string>& elements);
 
 	static bool DrawTree(Utility::Text text);
 	static void EndTree();

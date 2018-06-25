@@ -106,6 +106,19 @@ enum class Text : unsigned int
 	Cancel,
 	FileName,
 
+	Spawn,
+	Apply,
+	Remove,
+	
+	FunctionName,
+	Number,
+	String,
+	Boolean,
+	Inputs,
+	InputCount,
+	Outputs,
+	OutputCount,
+
 	// Virtual Machine and Compiler texts
 	DataSizeMismatchError = std::numeric_limits<unsigned int>::max()/2u + 1,
 	KoaFile,

@@ -108,6 +108,19 @@ Resource::Resource()
 	m_TextMap[Text::Cancel] = u8"Vazgec";
 	m_TextMap[Text::FileName] = u8"Dosya Adi";
 
+	m_TextMap[Text::Spawn] = u8"Sahnede Olustur";
+	m_TextMap[Text::Apply] = u8"Uygula";
+	m_TextMap[Text::Remove] = u8"Sil";
+
+	m_TextMap[Text::FunctionName] = u8"Fonksiyon Adi";
+	m_TextMap[Text::Number] = u8"Sayi";
+	m_TextMap[Text::String] = u8"Yazi";
+	m_TextMap[Text::Boolean] = u8"Kosul";
+	m_TextMap[Text::Inputs] = u8"Girisler";
+	m_TextMap[Text::InputCount] = u8"Giris Sayisi";
+	m_TextMap[Text::Outputs] = u8"Cikislar";
+	m_TextMap[Text::OutputCount] = u8"Cikis Sayisi";
+	
 	m_TextMap[Text::DataSizeMismatchError] = u8"koalaVM bu bilgisayarda calistirilamaz: veri boyutu uyusmazligi";
 	m_TextMap[Text::KoaFile] = u8"koa dosyasi";
 	m_TextMap[Text::KprojFile] = u8"kproj dosyasi";

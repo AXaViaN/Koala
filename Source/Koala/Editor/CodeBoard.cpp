@@ -6,6 +6,7 @@
 namespace Koala::Editor {
 
 static const Gfx::Vector2 FunctionStartPosition = Gfx::Vector2(0.05f, 0.1f);
+static const Gfx::Vector2 FunctionReturnPosition = Gfx::Vector2(0.65f, 0.1f);
 
 CodeBoard::CodeBoard(const Tool::Window& window) :
 	Gfx::Panel(window, 
@@ -19,22 +20,6 @@ CodeBoard::CodeBoard(const Tool::Window& window) :
 	Panel::DisablePanelInput();
 
 	Initialize();
-
-	// Test user functions
-#if 0
-	m_FunctionList.emplace_back();
-	m_FunctionList.back().SceneNodes.emplace_back();
-	m_FunctionList.back().SceneNodes.back().Position = FunctionStartPosition;
-	{
-		Utility::Core::FunctionInfo functionInfo;
-		functionInfo.Name = "Test";
-		functionInfo.FrontSlots.emplace_back("", Utility::Core::VariableType::None);
-		functionInfo.FrontSlots.emplace_back("Deger", Utility::Core::VariableType::Float64);
-
-		size_t programFunctionID = Utility::Core::FunctionManager::Add(functionInfo);
-		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionID);
-	}
-#endif
 }
 
 void CodeBoard::OnGui()
@@ -131,37 +116,7 @@ void CodeBoard::OnMessage(Service::MessageType type, void* data)
 			}
 
 			auto removeData = static_cast<Service::NodeRemoveData*>(data);
-			auto& sceneNodes = m_FunctionList[m_SelectedFunction].SceneNodes;
-			size_t removeIndex = 0;
-			for( size_t i=0 ; i<sceneNodes.size() ; ++i )
-			{
-				if(&sceneNodes[i].Node == &removeData->Node)
-				{
-					removeIndex = i;
-					break;
-				}
-			}
-
-			if(removeIndex >= m_FunctionList[m_SelectedFunction].CoreNodeCount)
-			{
-				auto& node = sceneNodes[removeIndex].Node;
-				// First remove the connections
-				static Utility::Core::SlotSide slotSides[] = {Utility::Core::SlotSide::Front, 
-															  Utility::Core::SlotSide::Back};
-				for( auto& slotSide : slotSides )
-				{
-					for( auto& slot : node.GetSlots(slotSide) )
-					{
-						if(slot.IsConnected())
-						{
-							RemoveConnections(slot, slotSide);
-						}
-					}
-				}
-
-				// Remove the node
-				sceneNodes.erase(sceneNodes.begin() + removeIndex);
-			}
+			RemoveSceneNode(removeData->Node);
 
 			break;
 		}
@@ -284,6 +239,156 @@ void CodeBoard::OnMessage(Service::MessageType type, void* data)
 			
 			break;
 		}
+		case Service::MessageType::EditUserFunction:
+		{
+			auto userFunctionData = static_cast<Service::EditUserFunctionData*>(data);
+			auto& userFunction = Utility::Core::FunctionManager::Get(userFunctionData->FunctionID);
+			
+			// Validity check
+			if(userFunction.ID == 0 || 
+			   userFunction.Name.size() == 0 || 
+			   userFunction.Name[0] == '\0')
+			{
+				break;
+			}
+
+			// Find the function on m_FunctionList
+			size_t functionIndex = -1;
+			for( size_t i=0 ; i<m_FunctionList.size() ; ++i )
+			{
+				if(m_FunctionList[i].FunctionID == userFunction.ID)
+				{
+					functionIndex = i;
+					break;
+				}
+			}
+
+			// Add if the function is not found
+			if(functionIndex == -1)
+			{
+				auto& newFunction = m_FunctionList.emplace_back();
+				newFunction.FunctionID = userFunction.ID;
+				auto& newFunctionStartNode = newFunction.SceneNodes.emplace_back();
+				newFunctionStartNode.Position = FunctionStartPosition;
+				{
+					Utility::Core::FunctionInfo startFunctionInfo;
+					startFunctionInfo.Name = userFunction.Name;
+					startFunctionInfo.FrontSlots = userFunction.BackSlots;
+
+					size_t startFunctionID = Utility::Core::FunctionManager::Add(startFunctionInfo);
+					newFunctionStartNode.Node = Utility::Core::Node(startFunctionID);
+				}
+
+				functionIndex = m_FunctionList.size() - 1u;
+			}
+
+			// Check return nodes and update
+			if(m_FunctionList[functionIndex].CoreNodeCount == 1 && 
+			   userFunction.FrontSlots.size() > 1)
+			{
+				// Add a return node
+				auto& sceneNodes = m_FunctionList[functionIndex].SceneNodes;
+				auto& functionReturnNode = *sceneNodes.emplace(sceneNodes.begin()+1);
+
+				functionReturnNode.Position = FunctionReturnPosition;
+				{
+					Utility::Core::FunctionInfo returnFunctionInfo;
+					returnFunctionInfo.Name = userFunction.Name;
+					returnFunctionInfo.BackSlots = userFunction.FrontSlots;
+
+					size_t returnFunctionID = Utility::Core::FunctionManager::Add(returnFunctionInfo);
+					functionReturnNode.Node = Utility::Core::Node(returnFunctionID);
+				}
+
+				m_FunctionList[functionIndex].CoreNodeCount = 2;
+			}
+			else if(m_FunctionList[functionIndex].CoreNodeCount == 2 && 
+					userFunction.FrontSlots.size() == 1)
+			{
+				// Remove the return node
+				auto& sceneNodes = m_FunctionList[functionIndex].SceneNodes;
+				auto& functionReturnNode = sceneNodes[1].Node;
+
+				for( auto& slot : functionReturnNode.GetBackSlots() )
+				{
+					RemoveConnections(slot, Utility::Core::SlotSide::Back);
+				}
+				sceneNodes.erase(sceneNodes.begin() + 1);
+				
+				// TODO: Fix name disappearing bug on function remove
+				// Utility::Core::FunctionManager::Remove(functionReturnNode.GetFunctionID());
+
+				m_FunctionList[functionIndex].CoreNodeCount = 1;
+			}
+
+			// Update the start/return nodes
+			{
+				auto& functionStartNode = m_FunctionList[functionIndex].SceneNodes[0].Node;
+				auto startNodeInfo = Utility::Core::FunctionManager::Get(functionStartNode.GetFunctionID());
+
+				// We only care about the name here
+				startNodeInfo.Name = userFunction.Name;
+				Utility::Core::FunctionManager::Edit(startNodeInfo.ID, startNodeInfo);
+
+				// Update
+				UpdateNodeVariables(functionStartNode, Utility::Core::SlotSide::Front, userFunction.BackSlots);
+			}
+			if(m_FunctionList[functionIndex].CoreNodeCount == 2)
+			{
+				auto& functionReturnNode = m_FunctionList[functionIndex].SceneNodes[1].Node;
+				auto startNodeInfo = Utility::Core::FunctionManager::Get(functionReturnNode.GetFunctionID());
+
+				// We only care about the name here
+				startNodeInfo.Name = userFunction.Name;
+				Utility::Core::FunctionManager::Edit(startNodeInfo.ID, startNodeInfo);
+
+				// Update
+				UpdateNodeVariables(functionReturnNode, Utility::Core::SlotSide::Back, userFunction.FrontSlots);
+			}
+
+			// Check the nodes on all functions and update
+			for( auto& function : m_FunctionList )
+			{
+				for( auto& sceneNode : function.SceneNodes )
+				{
+					if(sceneNode.Node.GetFunctionID() == userFunction.ID)
+					{
+						UpdateNodeVariables(sceneNode.Node, Utility::Core::SlotSide::Front, userFunction.FrontSlots);
+						UpdateNodeVariables(sceneNode.Node, Utility::Core::SlotSide::Back, userFunction.BackSlots);
+					}
+				}
+			}
+
+			break;
+		}
+		case Service::MessageType::RemoveUserFunction:
+		{
+			auto userFunctionData = static_cast<Service::RemoveUserFunctionData*>(data);
+
+			// Remove function from m_FunctionList
+			for( size_t i=0 ; i<m_FunctionList.size() ; ++i )
+			{
+				if(m_FunctionList[i].FunctionID == userFunctionData->FunctionID)
+				{
+					m_FunctionList.erase(m_FunctionList.begin() + i);
+					break;
+				}
+			}
+
+			// Remove function from SceneNodes
+			for( auto& function : m_FunctionList )
+			{
+				for( auto& sceneNode : function.SceneNodes )
+				{
+					if(sceneNode.Node.GetFunctionID() == userFunctionData->FunctionID)
+					{
+						RemoveSceneNode(sceneNode.Node);
+					}
+				}
+			}
+
+			break;
+		}
 	}
 }
 void CodeBoard::OnInput(Service::InputMessageType type, const Service::InputMessageData& data)
@@ -318,13 +423,14 @@ void CodeBoard::Initialize()
 {
 	m_FunctionList.clear();
 
-	m_FunctionList.emplace_back();
-	m_FunctionList.back().SceneNodes.emplace_back();
+	auto& newFunction = m_FunctionList.emplace_back();
+	auto& newFunctionStartNode = newFunction.SceneNodes.emplace_back();
+	newFunctionStartNode.Position = FunctionStartPosition;
 	{
 		auto& programFunctionInfo = Utility::Core::FunctionManager::GetDefault(Utility::Text::Program);
 
-		m_FunctionList.back().SceneNodes.back().Node = Utility::Core::Node(programFunctionInfo.ID);
-		m_FunctionList.back().SceneNodes.back().Position = FunctionStartPosition;
+		newFunction.FunctionID = programFunctionInfo.ID;
+		newFunctionStartNode.Node = Utility::Core::Node(programFunctionInfo.ID);
 	}
 
 	m_SelectedFunction = 0;
@@ -342,6 +448,51 @@ SceneNode& CodeBoard::GetSceneNode(Utility::Core::NodeID nodeID)
 
 	return m_FunctionList[m_SelectedFunction].SceneNodes[0];
 }
+void CodeBoard::RemoveSceneNode(const Utility::Core::Node& node)
+{
+	for( auto& function : m_FunctionList )
+	{
+		// Find the node
+		auto& sceneNodes = function.SceneNodes;
+		size_t removeIndex = -1;
+		for( size_t i=0 ; i<sceneNodes.size() ; ++i )
+		{
+			if(&sceneNodes[i].Node == &node)
+			{
+				removeIndex = i;
+				break;
+			}
+		}
+		if(removeIndex == -1)
+		{
+			continue;
+		}
+
+		// Remove
+		if(removeIndex >= function.CoreNodeCount)
+		{
+			auto& node = sceneNodes[removeIndex].Node;
+			// First remove the connections
+			static Utility::Core::SlotSide slotSides[] = {Utility::Core::SlotSide::Front, 
+														  Utility::Core::SlotSide::Back};
+			for( auto& slotSide : slotSides )
+			{
+				for( auto& slot : node.GetSlots(slotSide) )
+				{
+					if(slot.IsConnected())
+					{
+						RemoveConnections(slot, slotSide);
+					}
+				}
+			}
+
+			// Remove the node
+			sceneNodes.erase(sceneNodes.begin() + removeIndex);
+		}
+
+		break;
+	}
+}
 void CodeBoard::RemoveConnections(Utility::Core::Slot& slot, Utility::Core::SlotSide slotSide)
 {
 	if(slot.IsConnected())
@@ -356,6 +507,43 @@ void CodeBoard::RemoveConnections(Utility::Core::Slot& slot, Utility::Core::Slot
 		}
 
 		slot.DisconnectAll();
+	}
+}
+void CodeBoard::UpdateNodeVariables(Utility::Core::Node& node, Utility::Core::SlotSide slotSide, const std::vector<Utility::Core::Variable>& defaultVariables)
+{
+	// Fix the slot number
+	auto& functionStartNodeSlots = node.GetSlots(slotSide);
+	if(functionStartNodeSlots.size() > defaultVariables.size())
+	{
+		size_t eraseIndex = defaultVariables.size();
+		size_t lastEraseIndex = functionStartNodeSlots.size();
+		for( size_t i=eraseIndex ; i<lastEraseIndex ; ++i )
+		{
+			RemoveConnections(functionStartNodeSlots[eraseIndex], Utility::Core::SlotSide::Front);
+			functionStartNodeSlots.erase(functionStartNodeSlots.begin() + eraseIndex);
+		}
+	}
+	else if(functionStartNodeSlots.size() < defaultVariables.size())
+	{
+		for( size_t i=functionStartNodeSlots.size() ; i<defaultVariables.size() ; ++i )
+		{
+			functionStartNodeSlots.emplace_back(node.GetID(), 
+												i, 
+												defaultVariables[i]);
+		}
+	}
+
+	// Fix the variable types
+	for( size_t i=0 ; i<functionStartNodeSlots.size() ; ++i )
+	{
+		auto& variable = functionStartNodeSlots[i].GetVariable();
+		auto& templateVariable = defaultVariables[i];
+
+		variable.SetName(templateVariable.GetName());
+		if(variable.GetVariableType() != templateVariable.GetVariableType())
+		{
+			variable = templateVariable;
+		}
 	}
 }
 

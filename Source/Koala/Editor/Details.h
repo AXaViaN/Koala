@@ -12,6 +12,10 @@ public:
 
 private:
 	virtual void OnGui() override;
+	virtual void OnMessage(Service::MessageType type, void* data) override;
+
+private:
+	Utility::Core::FunctionID m_CurrentUserFunction = -1;
 
 };
 

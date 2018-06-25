@@ -28,13 +28,32 @@ void ControlPanel::OnGui()
 	Renderer::DrawSameLine(ButtonSpacing);
 	if(Renderer::DrawIconButton(Utility::Icon::NewFunction, ButtonHeight, ButtonColor))
 	{
-		
+		Utility::Core::FunctionInfo newFunctionInfo;
+		newFunctionInfo.BackSlots.emplace_back("", Utility::Core::VariableType::None);
+		newFunctionInfo.FrontSlots.emplace_back("", Utility::Core::VariableType::None);
+
+		auto newFunctionID = Utility::Core::FunctionManager::Add(newFunctionInfo);
+		m_UserFunctionIDs.emplace_back(newFunctionID);
+
+		Service::EditUserFunctionData data = {newFunctionID};
+		SendMessage(Service::MessageType::EditUserFunction, &data);
 	}
 
 	// Draw trees
 	Renderer::Spacing(3);
 	if(Renderer::DrawTree(Utility::Text::Functions))
 	{
+		for( auto& functionID : m_UserFunctionIDs )
+		{
+			auto& functionName = Utility::Core::FunctionManager::Get(functionID).Name;
+			if(functionName.size() > 0 && 
+			   functionName[0] != '\0' && 
+			   Renderer::DrawText(functionName))
+			{
+				Service::EditUserFunctionData data = {functionID};
+				SendMessage(Service::MessageType::EditUserFunction, &data);
+			}
+		}
 		
 		Renderer::EndTree();
 	}
@@ -42,6 +61,35 @@ void ControlPanel::OnGui()
 	{
 
 		Renderer::EndTree();
+	}
+}
+void ControlPanel::OnMessage(Service::MessageType type, void* data)
+{
+	switch(type)
+	{
+		case Service::MessageType::NewProject:
+		{
+			m_UserFunctionIDs = {};
+			break;
+		}
+		case Service::MessageType::RemoveUserFunction:
+		{
+			auto userFunctionData = static_cast<Service::RemoveUserFunctionData*>(data);
+
+			for( auto& it=m_UserFunctionIDs.begin() ; it!=m_UserFunctionIDs.end() ; ++it )
+			{
+				auto& userFunctionID = *it;
+
+				if(userFunctionID == userFunctionData->FunctionID)
+				{
+					Utility::Core::FunctionManager::Remove(userFunctionID);
+					m_UserFunctionIDs.erase(it);
+					break;
+				}
+			}
+
+			break;
+		}
 	}
 }
 

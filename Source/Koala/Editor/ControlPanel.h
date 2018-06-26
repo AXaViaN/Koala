@@ -17,6 +17,8 @@ private:
 
 private:
 	std::vector<Utility::Core::FunctionID> m_UserFunctionIDs;
+	std::vector<std::vector<Utility::Core::FunctionID>> m_VariableFunctionIDs;
+	size_t m_SelectedFunction = 0;
 
 };
 

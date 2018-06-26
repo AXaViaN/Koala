@@ -188,10 +188,13 @@ static Service::SaveProjectData ConvertSerializationData(const Utility::Serializ
 
 	otherData.ProjectName = data.ProjectName;
 	otherData.SelectedFunction = data.SelectedFunction;
+	otherData.UserFunctionIDs = data.UserFunctionIDs;
+	otherData.VariableFunctionIDs = data.VariableFunctionIDs;
 	for( auto& function : data.Functions )
 	{
 		auto& otherFunction = otherData.Functions.emplace_back();
 
+		otherFunction.FunctionID = function.FunctionID;
 		otherFunction.CoreNodeCount = function.CoreNodeCount;
 		otherFunction.DragOffset = Gfx::Vector2(function.DragOffset.X, function.DragOffset.Y);
 		for( auto& sceneNode : function.SceneNodes )
@@ -211,10 +214,13 @@ static Utility::Serialization::Data ConvertSerializationData(const Service::Save
 
 	otherData.ProjectName = data.ProjectName;
 	otherData.SelectedFunction = data.SelectedFunction;
+	otherData.UserFunctionIDs = data.UserFunctionIDs;
+	otherData.VariableFunctionIDs = data.VariableFunctionIDs;
 	for( auto& function : data.Functions )
 	{
 		auto& otherFunction = otherData.Functions.emplace_back();
 
+		otherFunction.FunctionID = function.FunctionID;
 		otherFunction.CoreNodeCount = function.CoreNodeCount;
 		otherFunction.DragOffset.X = function.DragOffset.GetX();
 		otherFunction.DragOffset.Y = function.DragOffset.GetY();

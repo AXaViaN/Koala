@@ -16,6 +16,7 @@ private:
 
 private:
 	Utility::Core::FunctionID m_CurrentUserFunction = -1;
+	Utility::Core::FunctionID m_CurrentVariableFunction = -1;
 
 };
 

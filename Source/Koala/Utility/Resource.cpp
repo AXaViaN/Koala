@@ -120,6 +120,9 @@ Resource::Resource()
 	m_TextMap[Text::InputCount] = u8"Giris Sayisi";
 	m_TextMap[Text::Outputs] = u8"Cikislar";
 	m_TextMap[Text::OutputCount] = u8"Cikis Sayisi";
+
+	m_TextMap[Text::Variable] = u8"Degisken";
+	m_TextMap[Text::VariableName] = u8"Degisken Adi";
 	
 	m_TextMap[Text::DataSizeMismatchError] = u8"koalaVM bu bilgisayarda calistirilamaz: veri boyutu uyusmazligi";
 	m_TextMap[Text::KoaFile] = u8"koa dosyasi";

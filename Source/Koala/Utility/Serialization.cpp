@@ -37,10 +37,12 @@ void Serialization::SaveProject(const std::string& path, const Data& data)
 	projectFile.WriteBinaryNumber(data.Functions.size());
 	for( auto& function : data.Functions )
 	{
+		projectFile.WriteBinaryNumber(function.FunctionID);
+		projectFile.WriteBinaryNumber(function.CoreNodeCount);
+
 		// Mouse drag
 		projectFile.WriteBinaryNumber(function.DragOffset.X);
 		projectFile.WriteBinaryNumber(function.DragOffset.Y);
-		projectFile.WriteBinaryNumber(function.CoreNodeCount);
 
 		// Nodes
 		projectFile.WriteBinaryNumber(function.SceneNodes.size());
@@ -78,6 +80,22 @@ void Serialization::SaveProject(const std::string& path, const Data& data)
 					writeVariable(slot.GetVariable());
 				}
 			}
+		}
+	}
+
+	// ControlPanel
+	projectFile.WriteBinaryNumber(data.UserFunctionIDs.size());
+	for( auto& userFunctionID : data.UserFunctionIDs )
+	{
+		projectFile.WriteBinaryNumber(userFunctionID);
+	}
+	projectFile.WriteBinaryNumber(data.VariableFunctionIDs.size());
+	for( auto& variableFunctionIDs : data.VariableFunctionIDs )
+	{
+		projectFile.WriteBinaryNumber(variableFunctionIDs.size());
+		for( auto& variableFunctionID : variableFunctionIDs )
+		{
+			projectFile.WriteBinaryNumber(variableFunctionID);
 		}
 	}
 
@@ -153,10 +171,12 @@ Serialization::Data Serialization::LoadProject(const std::string& path)
 	{
 		auto& function = data.Functions.emplace_back();
 
+		function.FunctionID = projectFile.ReadBinaryNumber<Core::FunctionID>();
+		function.CoreNodeCount = projectFile.ReadBinaryNumber<size_t>();
+
 		// Mouse drag
 		function.DragOffset.X = projectFile.ReadBinaryNumber<float>();
 		function.DragOffset.Y = projectFile.ReadBinaryNumber<float>();
-		function.CoreNodeCount = projectFile.ReadBinaryNumber<size_t>();
 
 		// Nodes
 		auto sceneNodeCount = projectFile.ReadBinaryNumber<size_t>();
@@ -201,6 +221,26 @@ Serialization::Data Serialization::LoadProject(const std::string& path)
 					slot.m_Variable = readVariable();
 				}
 			}
+		}
+	}
+
+	// ControlPanel
+	auto userFunctionIDsCount = projectFile.ReadBinaryNumber<size_t>();
+	while(userFunctionIDsCount-- > 0)
+	{
+		auto& userFunctionID = data.UserFunctionIDs.emplace_back();
+		userFunctionID = projectFile.ReadBinaryNumber<Core::FunctionID>();
+	}
+	auto variableFunctionIDsCount = projectFile.ReadBinaryNumber<size_t>();
+	while(variableFunctionIDsCount-- > 0)
+	{
+		auto& variableFunctionIDs = data.VariableFunctionIDs.emplace_back();
+
+		auto variableCount = projectFile.ReadBinaryNumber<size_t>();
+		while(variableCount-- > 0)
+		{
+			auto& variableFunctionID = variableFunctionIDs.emplace_back();
+			variableFunctionID = projectFile.ReadBinaryNumber<Core::FunctionID>();
 		}
 	}
 

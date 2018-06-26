@@ -119,6 +119,9 @@ enum class Text : unsigned int
 	Outputs,
 	OutputCount,
 
+	Variable,
+	VariableName,
+
 	// Virtual Machine and Compiler texts
 	DataSizeMismatchError = std::numeric_limits<unsigned int>::max()/2u + 1,
 	KoaFile,

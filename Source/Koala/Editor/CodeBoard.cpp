@@ -34,7 +34,14 @@ void CodeBoard::OnGui()
 			functionNames.emplace_back(m_FunctionList[i].SceneNodes[0].Node.GetName());
 		}
 
+		auto oldSelection = m_SelectedFunction;
 		CodeBoardButtonPanel::Instance(m_Window).Update(functionNames, m_SelectedFunction);
+
+		if(m_SelectedFunction != oldSelection)
+		{
+			Service::FunctionSelectedData data = {m_SelectedFunction};
+			SendMessage(Service::MessageType::FunctionSelected, &data);
+		}
 	}
 
 	// Draw Nodes
@@ -371,6 +378,12 @@ void CodeBoard::OnMessage(Service::MessageType type, void* data)
 				if(m_FunctionList[i].FunctionID == userFunctionData->FunctionID)
 				{
 					m_FunctionList.erase(m_FunctionList.begin() + i);
+
+					if(i == m_SelectedFunction)
+					{
+						m_SelectedFunction = 0;
+					}
+
 					break;
 				}
 			}
@@ -384,6 +397,46 @@ void CodeBoard::OnMessage(Service::MessageType type, void* data)
 					{
 						RemoveSceneNode(sceneNode.Node);
 					}
+				}
+			}
+
+			break;
+		}
+		case Service::MessageType::EditVariableFunction:
+		{
+			auto variableFunctionData = static_cast<Service::EditVariableFunctionData*>(data);
+			auto& variableFunction = Utility::Core::FunctionManager::Get(variableFunctionData->FunctionID);
+
+			// Validity check
+			if(variableFunction.ID == 0 || 
+			   variableFunction.Name.size() == 0 || 
+			   variableFunction.Name[0] == '\0')
+			{
+				break;
+			}
+
+			// Check the nodes and update
+			for( auto& sceneNode : m_FunctionList[m_SelectedFunction].SceneNodes )
+			{
+				if(sceneNode.Node.GetFunctionID() == variableFunction.ID)
+				{
+					UpdateNodeVariables(sceneNode.Node, Utility::Core::SlotSide::Front, variableFunction.FrontSlots);
+					UpdateNodeVariables(sceneNode.Node, Utility::Core::SlotSide::Back, variableFunction.BackSlots);
+				}
+			}
+
+			break;
+		}
+		case Service::MessageType::RemoveVariableFunction:
+		{
+			auto variableFunctionData = static_cast<Service::RemoveVariableFunctionData*>(data);
+
+			// Remove variable function from SceneNodes
+			for( auto& sceneNode : m_FunctionList[m_SelectedFunction].SceneNodes )
+			{
+				if(sceneNode.Node.GetFunctionID() == variableFunctionData->FunctionID)
+				{
+					RemoveSceneNode(sceneNode.Node);
 				}
 			}
 

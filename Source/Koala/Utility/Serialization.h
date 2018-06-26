@@ -37,6 +37,7 @@ struct Serialization::SceneNode
 };
 struct Serialization::Function
 {
+	Utility::Core::FunctionID FunctionID = 0;
 	std::vector<SceneNode> SceneNodes;
 	size_t CoreNodeCount = 1;
 
@@ -48,6 +49,9 @@ struct Serialization::Data
 
 	std::vector<Function> Functions;
 	size_t SelectedFunction;
+
+	std::vector<Utility::Core::FunctionID> UserFunctionIDs;
+	std::vector<std::vector<Utility::Core::FunctionID>> VariableFunctionIDs;
 
 	bool IsDataValid = false;
 };

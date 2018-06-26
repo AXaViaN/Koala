@@ -70,6 +70,10 @@ struct InputMessageData
 	\
 	value(EditUserFunction) \
 	value(RemoveUserFunction) \
+	value(EditVariableFunction) \
+	value(RemoveVariableFunction) \
+	\
+	value(FunctionSelected) \
 
 DECLARE_ENUM(MessageType, MESSAGE_TYPES)
 
@@ -79,6 +83,9 @@ struct SaveProjectData
 
 	std::vector<Function> Functions;
 	size_t SelectedFunction;
+
+	std::vector<Utility::Core::FunctionID> UserFunctionIDs;
+	std::vector<std::vector<Utility::Core::FunctionID>> VariableFunctionIDs;
 };
 using LoadProjectData = SaveProjectData;
 
@@ -125,6 +132,13 @@ struct EditUserFunctionData
 	const Utility::Core::FunctionID FunctionID;
 };
 using RemoveUserFunctionData = EditUserFunctionData;
+using EditVariableFunctionData = EditUserFunctionData;
+using RemoveVariableFunctionData = EditUserFunctionData;
+
+struct FunctionSelectedData
+{
+	const size_t FunctionIndex;
+};
 
 } // namespace Koala::Editor::Service
 

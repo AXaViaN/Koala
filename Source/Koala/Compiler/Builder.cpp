@@ -18,7 +18,9 @@ struct FunctionFlows
 
 struct TemporaryVariable
 {
-	Utility::Core::Port Port;
+	Utility::Core::FunctionID FunctionID = 0;
+	std::vector<Utility::Core::Port> Ports;
+
 	size_t Position = 0;
 	size_t Size = 0;
 	unsigned char Mode = 0; // mode0: char, mode1: double, mode2: long long, mode3: string
@@ -64,9 +66,12 @@ public:
 	{
 		for( auto& variable : TemporaryVariables )
 		{
-			if(variable.Port == port)
+			for( auto& currentPort : variable.Ports )
 			{
-				return variable;
+				if(currentPort == port)
+				{
+					return variable;
+				}
 			}
 		}
 
@@ -85,7 +90,7 @@ static void FindFlows(std::map<Utility::Core::NodeID, FunctionFlows>& nodeFlows,
 static void CompileNodes(std::string& constantBufferCode, FunctionData& functionData, const std::map<Utility::Core::NodeID, FunctionFlows>& flows, const std::vector<Utility::Core::Node>& nodes, bool isMainFlow);
 static void ProcessConstant(std::string& constantBufferCode, std::string& functionCode, const Koala::Utility::Core::Variable& variable);
 static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData& functionData, const std::map<Utility::Core::NodeID, FunctionFlows>& flows, const Utility::Core::Node& node, const Koala::Utility::Text& defaultFunctionText);
-static TemporaryVariable CreateLocalVariable(FunctionData& functionData, const Utility::Core::Port& port, const Utility::Core::VariableType& variableType);
+static TemporaryVariable CreateLocalVariable(FunctionData& functionData, const Utility::Core::Port& port, const Utility::Core::VariableType& variableType, Utility::Core::FunctionID functionID=0);
 static void CallLocalVariable(FunctionData& functionData, const TemporaryVariable& temporaryVariable);
 static void LoadLocalVariable(FunctionData& functionData, const TemporaryVariable& temporaryVariable);
 
@@ -354,7 +359,8 @@ static void CompileNodes(std::string& constantBufferCode, FunctionData& function
 		if(node.GetFrontSlots().size() > 0 && 
 		   nodeTemplate.NameText != Utility::Text::If && 
 		   nodeTemplate.NameText != Utility::Text::ForLoop && 
-		   nodeTemplate.NameText != Utility::Text::WhileLoop)
+		   nodeTemplate.NameText != Utility::Text::WhileLoop && 
+		   nodeTemplate.NameText != Utility::Text::Variable)
 		{
 			for( auto it=node.GetFrontSlots().begin()+1 ; it!=node.GetFrontSlots().end() ; ++it )
 			{
@@ -720,15 +726,69 @@ static void ProcessDefaultFunction(std::string& constantBufferCode, FunctionData
 			functionData.Code += (unsigned char)Utility::Instruction::s2d;
 			break;
 		}
+		case Koala::Utility::Text::Variable:
+		{
+			// Linking data
+			BranchLink setLocalBranch;
+			BranchLink endBranch;
+
+			auto localVariable = CreateLocalVariable(functionData, node.GetFrontSlots().at(1).GetPort(), node.GetFrontSlots().at(1).GetVariable().GetVariableType(), node.GetFunctionID());
+
+			// Jump to set local if the condition is true
+			functionData.Code += (unsigned char)Utility::Instruction::push64;
+			setLocalBranch.LinkPosition = functionData.Code.size();
+			functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(-1);
+			functionData.Code += (unsigned char)Utility::Instruction::jmpcond;
+
+			// On false, drop the value in the stack
+			for( size_t i=0 ; i<localVariable.Size ; ++i )
+			{
+				functionData.Code += (unsigned char)Utility::Instruction::drop8;
+			}
+
+			// Jump to the end
+			functionData.Code += (unsigned char)Utility::Instruction::push64;
+			endBranch.LinkPosition = functionData.Code.size();
+			functionData.Code += Utility::Extra::Util::GetBinaryNumber<long long>(-1);
+			functionData.Code += (unsigned char)Utility::Instruction::jmp;
+
+			// On true, set local variable
+			setLocalBranch.BranchPosition = functionData.Code.size();
+			LoadLocalVariable(functionData, localVariable);
+
+			// end-of-branch
+			endBranch.BranchPosition = functionData.Code.size();
+
+			// Linking data
+			functionData.BranchLinks.emplace_back(setLocalBranch);
+			functionData.BranchLinks.emplace_back(endBranch);
+
+			break;
+		}
 	}
 }
-static TemporaryVariable CreateLocalVariable(FunctionData& functionData, const Utility::Core::Port& port, const Utility::Core::VariableType& variableType)
+static TemporaryVariable CreateLocalVariable(FunctionData& functionData, const Utility::Core::Port& port, const Utility::Core::VariableType& variableType, Utility::Core::FunctionID functionID)
 {
+	if(functionID != 0)
+	{
+		for( auto& localVariable : functionData.TemporaryVariables )
+		{
+			if(localVariable.FunctionID == functionID)
+			{
+				localVariable.Ports.emplace_back(port);
+
+				return localVariable;
+			}
+		}
+	}
+
 	size_t temporaryVariablePosition = functionData.TemporaryVariables.back().Position + 
 									   functionData.TemporaryVariables.back().Size;
 
 	auto& temporaryVariable = functionData.TemporaryVariables.emplace_back();
-	temporaryVariable.Port = port;
+
+	temporaryVariable.FunctionID = functionID;
+	temporaryVariable.Ports.emplace_back(port);
 	temporaryVariable.Position = temporaryVariablePosition;
 	switch(variableType)
 	{
